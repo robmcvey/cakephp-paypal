@@ -39,5 +39,17 @@ class PaymentsController extends AppController {
 		$response = $this->Paypal->doExpressCheckoutPayment(); 
     		debug($response);
   	}
+  	
+  	// Do a direct credit card payment
+  	public function charge_card() {
+  		$this->Paypal->amount = 10.00;
+		$this->Paypal->currencyCode = 'GBP';	
+		$this->Paypal->creditCardNumber = 'xxxxxxxxxxxx1234';
+		$this->Paypal->creditCardCvv = '123';
+		$this->Paypal->creditCardExpires = '012020';
+		$this->Paypal->creditCardType = 'Visa';
+		$result = $this->Paypal->doDirectPayment();
+		debug($result);
+  	}
 
 }
