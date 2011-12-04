@@ -5,7 +5,7 @@
 * CakePHP 2.0.X
 * A PayPal Website Payments Pro account
 * A API username, password and signature (From PayPal -> Profile -> API Settings -> Signature)
-* An valid SLL certificate
+* A valid SSL certificate
 
 This component can handle two type of PayPal transaction, Express Checkout and Direct Payment.
 
