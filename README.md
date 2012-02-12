@@ -1,9 +1,11 @@
 # Paypal Website Payments Pro Component for CakePHP 2.0.X
 
+This component can be used to initiate PayPal Express payments, and process credit card payments with the Direct Payment method.
+
 ### Requirements
 
 * CakePHP 2.0.X
-* A PayPal Website Payments Pro account
+* A PayPal Website Payments Pro account https://www.paypal-business.co.uk/process-online-payments-with-paypal/index.htm
 * A API username, password and signature (From PayPal -> Profile -> API Settings -> Signature)
 * A valid SSL certificate
 
