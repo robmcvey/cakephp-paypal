@@ -26,9 +26,9 @@ class PaypalComponent extends Component {
 	public $sandboxConfig = array(
 		'webscr' => 'https://www.sandbox.paypal.com/webscr/',
 		'endpoint' => 'https://api.sandbox.paypal.com/nvp/',
-		'password' => '13222',
-		'email' => 'robmcv_12iz_api1.gmail.com',
-		'signature' => 'An5ns1KsViSQTV.0UUxbV4NuL2'
+		'password' => '',
+		'email' => '',
+		'signature' => ''
 	);
 
 	// API version
