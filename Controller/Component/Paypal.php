@@ -16,7 +16,7 @@ class PaypalComponent extends Component {
 	// Live paypal API config
 	public $config = array(
 		'webscr' => 'https://www.paypal.com/webscr/',
-		'endpoint' => 'https://api.paypal.com/nvp/',
+		'endpoint' => 'https://api-3t.paypal.com/nvp/',
 		'password' => '',
 		'email' => '',
 		'signature' => ''
@@ -25,7 +25,7 @@ class PaypalComponent extends Component {
 	// Sandbox paypal API config
 	public $sandboxConfig = array(
 		'webscr' => 'https://www.sandbox.paypal.com/webscr/',
-		'endpoint' => 'https://api.sandbox.paypal.com/nvp/',
+		'endpoint' => 'https://api-3t.sandbox.paypal.com/nvp/',
 		'password' => '',
 		'email' => '',
 		'signature' => ''
