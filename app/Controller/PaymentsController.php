@@ -10,6 +10,13 @@ class PaymentsController extends AppController {
 	// Include the Payapl component
 	public $components = array('Paypal');
   
+
+	// Example usuage
+	public function index() {
+		
+	}
+
+
   	// Set the values and begin paypal process
   	public function express_checkout() {
 		try{
@@ -23,41 +30,45 @@ class PaymentsController extends AppController {
 			$this->Paypal->expressCheckout();
 		} catch(Exception $e) {
 			$this->Session->setFlash($e->getMessage());
+			return $this->redirect('index');
 		}
   	}
   
+
 	// Use the token in the return URL to fetch details
   	public function get_details() {
-    		try {
-	    		$this->Paypal->token = $this->request->query['token'];
-	    		$this->Paypal->payerId = $this->request->query['PayerID'];
-			$customer_details = $this->Paypal->getExpressCheckoutDetails();
-	    		debug($customer_details);
-    		} catch(Exception $e) {
-			$this->Session->setFlash($e->getMessage());
-		}
-  	}
-  
-  	// Complete the payment, pass back the token and payerId
-  	public function complete_express_checkout($token,$payerId) {
-    		try{
-	    		$this->Paypal->amount = 10.00;
+		try {
+    		$this->autoRender = false;
+
+    		// Token and PayerID will be present in URL
+    		$this->Paypal->token = $this->request->query['token'];
+    		$this->Paypal->payerId = $this->request->query['PayerID'];
+    		
+			// At this point, you can let the customer review their order.
+			// Use the "getExpressCheckoutDetails" method to fetch details...
+    		$customer_details = $this->Paypal->getExpressCheckoutDetails();
+    		debug($customer_details);
+
+    		// Then you must call "doExpressCheckoutPayment" to complete the payment
+    		$this->Paypal->amount = 10.00;
 			$this->Paypal->currencyCode = 'GBP';
-	    		$this->Paypal->token = $token;
-			$this->Paypal->payerId = $payerId;
-			$response = $this->Paypal->doExpressCheckoutPayment(); 
-	    		debug($response);
-    		} catch(Exception $e) {
+    		$response = $this->Paypal->doExpressCheckoutPayment(); 
+			debug($response);
+
+    	} catch(Exception $e) {
 			$this->Session->setFlash($e->getMessage());
+			return $this->redirect('index');
 		}
   	}
+
   	
   	// Do a direct credit card payment
   	public function charge_card() {
   		try {
+  			$this->autoRender = false;
 	  		$this->Paypal->amount = 10.00;
 			$this->Paypal->currencyCode = 'GBP';	
-			$this->Paypal->creditCardNumber = 'xxxxxxxxxxxx1234';
+			$this->Paypal->creditCardNumber = '4008068706418697'; // Paypal sandbox CC
 			$this->Paypal->creditCardCvv = '123';
 			$this->Paypal->creditCardExpires = '012020';
 			$this->Paypal->creditCardType = 'Visa';
@@ -65,6 +76,7 @@ class PaymentsController extends AppController {
 			debug($result);
   		} catch(Exception $e) {
 			$this->Session->setFlash($e->getMessage());
+			return $this->redirect('index');
 		}
   	}
 

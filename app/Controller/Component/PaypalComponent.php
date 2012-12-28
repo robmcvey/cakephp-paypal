@@ -120,14 +120,15 @@ class PaypalComponent extends Component {
 		
 		// Call the SetExpressCheckout method to get a fresh token
 		$token = $this->setExpressCheckout();
-		
-		// We have a token, redirect to paypals web server (not the URL is different to the API endpoint)
-		if($token) {
-			$this->_controller->redirect($this->config['webscr'].'?cmd=_express-checkout&token='.$token);
-		} else {
-			$this->log($token , 'paypal');
+
+		// Valid token
+		if(!array_key_exists('TOKEN' , $token)) {
 			throw new Exception(__('The was a problem with the payment gateway'));
 		}
+		
+		// We have a token, redirect to paypals web server (not the URL is different to the API endpoint)
+		return $this->_controller->redirect($this->config['webscr'].'?cmd=_express-checkout&token='.$token['TOKEN']);
+		
 	}
 	
 	
@@ -168,7 +169,7 @@ class PaypalComponent extends Component {
 		
 		// Handle the response
 		return $this->handleResponse($response);
-		
+
 	}
 	
 	

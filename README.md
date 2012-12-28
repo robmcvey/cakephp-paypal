@@ -7,7 +7,14 @@
 * A API username, password and signature (From PayPal -> Profile -> API Settings -> Signature)
 * A valid SSL certificate
 
-This component can handle two type of PayPal transaction, Express Checkout and Direct Payment.
+### Installation
+
+1. Update the component with your API username and signature
+2. Ensure component is configured with `$sandboxMode = true`
+3. In your browser, log in to PayPal sandbox
+3. Got to the PaymentsController at `/payments`
+
+This component can handle two types of PayPal transaction, Express Checkout and Direct Payment.
 
 ## Express Checkout
 
@@ -19,7 +26,7 @@ The user is redirected to PayPal where they log in, they are then redirected bac
 
 You can then use `Paypal::getExpressCheckoutDetails()` to fetch basic customer information, their billing address etc.
 
-If they are happy and want to proceed with purchase, call `Paypal::doExpressCheckoutPayment()` which then completes the payment.
+If they are happy and want to proceed with the purchase, call `Paypal::doExpressCheckoutPayment()` which then completes the payment.
 
 ## Direct Payment
 
@@ -27,8 +34,10 @@ https://cms.paypal.com/us/cgi-bin/?cmd=_render-content&content_ID=developer/e_ho
 
 The customer enters their billing information on your website (SSL required) and you use this to call `Paypal::doDirectPayment()` which will attempt to bill their card.
 
-### Notes
+## Notes
 
-Do not store credit card numbers, CVV numbers etc. in your database, sessions, cookies.
+<strong>Do not store credit card numbers, CVV numbers etc. in your database, sessions, cookies.</strong>
+
+Ensure you understand the legal requirements regarding PCI compliance when handling card data. 
 
 
