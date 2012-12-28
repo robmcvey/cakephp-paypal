@@ -55,7 +55,7 @@ class PaymentsController extends AppController {
 			$response = $this->Paypal->doExpressCheckoutPayment(); 
 			debug($response);
 
-    	} catch(Exception $e) {
+    		} catch(Exception $e) {
 			$this->Session->setFlash($e->getMessage());
 			return $this->redirect('index');
 		}
