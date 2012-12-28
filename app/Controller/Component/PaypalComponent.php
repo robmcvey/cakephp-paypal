@@ -249,36 +249,36 @@ class PaypalComponent extends Component {
 			
 		// Build the NVPs (Named value pairs)	
 		$doDirectPaymentNvp = array(
-		    'METHOD' => 'DoDirectPayment',
-		    'PAYMENTACTION' => 'SALE',
-		    'VERSION' => $this->apiVersion,
-		    'AMT' => $this->amount,
-		    'CURRENCYCODE' => $this->currencyCode,
-		    'IPADDRESS' => $this->ipAddress,
-		    'USER' => $this->config['email'],
+			'METHOD' => 'DoDirectPayment',
+		    	'PAYMENTACTION' => 'SALE',
+		    	'VERSION' => $this->apiVersion,
+		    	'AMT' => $this->amount,
+		    	'CURRENCYCODE' => $this->currencyCode,
+		    	'IPADDRESS' => $this->ipAddress,
+		    	'USER' => $this->config['email'],
 			'PWD' => $this->config['password'],									
 			'SIGNATURE' => $this->config['signature'],
 			
-		    // Credit Card Details
-		    'CREDITCARDTYPE' => $this->creditCardType,
-		    'ACCT' => $this->creditCardNumber,
-		    'EXPDATE' => $this->creditCardExpires,
-		    'CVV2' => $this->creditCardCvv,
-		    
-		    // Customer Details
-		    'SALUTATION' => $this->customerSalutation,
-		    'FIRSTNAME' => $this->customerFirstName,
-		    'MIDDLENAME' => $this->customerMiddleName,
-		    'LASTNAME' => $this->customerLastName,
-		    'SUFFIX' => $this->customerSuffix,
-		    
-		    // Billing Address
-		    'STREET' => $this->billingAddress1,
-		    'STREET2' => $this->billingAddress2,
-		    'CITY' => $this->billingCity,
-		    'STATE' => $this->billingState,
-		    'COUNTRYCODE' => $this->billingCountryCode,
-		    'ZIP' => $this->billingZip,
+			// Credit Card Details
+			'CREDITCARDTYPE' => $this->creditCardType,
+			'ACCT' => $this->creditCardNumber,
+			'EXPDATE' => $this->creditCardExpires,
+			'CVV2' => $this->creditCardCvv,
+			
+			// Customer Details
+			'SALUTATION' => $this->customerSalutation,
+			'FIRSTNAME' => $this->customerFirstName,
+			'MIDDLENAME' => $this->customerMiddleName,
+			'LASTNAME' => $this->customerLastName,
+			'SUFFIX' => $this->customerSuffix,
+			
+			// Billing Address
+			'STREET' => $this->billingAddress1,
+			'STREET2' => $this->billingAddress2,
+			'CITY' => $this->billingCity,
+			'STATE' => $this->billingState,
+			'COUNTRYCODE' => $this->billingCountryCode,
+			'ZIP' => $this->billingZip,
 		);	
 		
 		// HTTPSocket class		
