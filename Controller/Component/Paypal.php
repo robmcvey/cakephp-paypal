@@ -328,8 +328,6 @@ class PaypalComponent extends Component {
 		    'ZIP' => $this->billingZip,
 		);	
 		
-		$this->log($doDirectPaymentNvp);
-		
 		// HTTPSocket class		
 		$httpSocket = new HttpSocket();	
 
