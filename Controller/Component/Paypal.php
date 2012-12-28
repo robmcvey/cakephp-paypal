@@ -166,25 +166,9 @@ class PaypalComponent extends Component {
 		// Post the NVPs to the relevent endpoint
 		$response = $httpSocket->post($this->config['endpoint'] , $setExpressCheckoutNvp);
 		
-		// Parse the guff that comes back from paypal
-		parse_str($response->body , $parsed);
+		// Handle the response
+		return $this->handleResponse($response);
 		
-		// Return the token, or throw a human readable error
-		if(array_key_exists('TOKEN', $parsed) && array_key_exists('ACK', $parsed) && $parsed['ACK'] == 'Success') {
-			return $parsed['TOKEN'];
-		}
-		elseif(array_key_exists('ACK', $parsed) && array_key_exists('L_LONGMESSAGE0', $parsed) && $parsed['ACK'] != 'Success') {
-			$this->log($parsed , 'paypal');	
-			throw new Exception($parsed['ACK'] . ' : ' . $parsed['L_LONGMESSAGE0']);
-		}
-		elseif(array_key_exists('ACK', $parsed) && array_key_exists('L_ERRORCODE0', $parsed) && $parsed['ACK'] != 'Success') {
-			$this->log($parsed , 'paypal');	
-			throw new Exception($parsed['ACK'] . ' : ' . $parsed['L_ERRORCODE0']);
-		} 
-		else {
-			$this->log($parsed , 'paypal');	
-			throw new Exception(__('There is a problem with the payment gateway. Please try again later.'));
-		}
 	}
 	
 	
@@ -213,25 +197,9 @@ class PaypalComponent extends Component {
 		// Post the NVPs to the relevent endpoint
 		$response = $httpSocket->post($this->config['endpoint'] , $getExpressCheckoutDetailsNvp);
 
-		// Parse the guff that comes back from paypal
-		parse_str($response , $parsed);
-		
-		// Return the token, or throw a human readable error
-		if(array_key_exists('TOKEN', $parsed) && array_key_exists('ACK', $parsed) && $parsed['ACK'] == 'Success') {
-			return $parsed;
-		}
-		elseif(array_key_exists('ACK', $parsed) && array_key_exists('L_LONGMESSAGE0', $parsed) && $parsed['ACK'] != 'Success') {
-			$this->log($parsed , 'paypal');	
-			throw new Exception($parsed['ACK'] . ' : ' . $parsed['L_LONGMESSAGE0']);
-		}
-		elseif(array_key_exists('ACK', $parsed) && array_key_exists('L_ERRORCODE0', $parsed) && $parsed['ACK'] != 'Success') {
-			$this->log($parsed , 'paypal');	
-			throw new Exception($parsed['ACK'] . ' : ' . $parsed['L_ERRORCODE0']);
-		} 
-		else {
-			$this->log($parsed , 'paypal');
-			throw new Exception(__('There is a problem with the payment gateway. Please try again later.'));
-		}	
+		// Handle the response
+		return $this->handleResponse($response);
+
 	}
 	
 	
@@ -264,25 +232,9 @@ class PaypalComponent extends Component {
 		// Post the NVPs to the relevent endpoint
 		$response = $httpSocket->post($this->config['endpoint'] , $doExpressCheckoutPaymentNvp);
 
-		// Parse the guff that comes back from paypal
-		parse_str($response , $parsed);
-		
-		// Return the token, or throw a human readable error
-		if(array_key_exists('TOKEN', $parsed) && array_key_exists('ACK', $parsed) && $parsed['ACK'] == 'Success') {
-			return $parsed;
-		}
-		elseif(array_key_exists('ACK', $parsed) && array_key_exists('L_LONGMESSAGE0', $parsed) && $parsed['ACK'] != 'Success') {
-			$this->log($parsed , 'paypal');	
-			throw new Exception($parsed['ACK'] . ' : ' . $parsed['L_LONGMESSAGE0']);
-		}
-		elseif(array_key_exists('ACK', $parsed) && array_key_exists('L_ERRORCODE0', $parsed) && $parsed['ACK'] != 'Success') {
-			$this->log($parsed , 'paypal');	
-			throw new Exception($parsed['ACK'] . ' : ' . $parsed['L_ERRORCODE0']);
-		} 
-		else {
-			$this->log($parsed , 'paypal');
-			throw new Exception(__('There is a problem with the payment gateway. Please try again later.'));
-		}		
+		// Handle the response
+		return $this->handleResponse($response);
+
 	}
 
 
@@ -334,6 +286,20 @@ class PaypalComponent extends Component {
 		// Post the NVPs to the relevent endpoint
 		$response = $httpSocket->post($this->config['endpoint'] , $doDirectPaymentNvp);
 
+		// Handle the response
+		return $this->handleResponse($response);
+				
+	}
+
+
+	/**
+	 * Handle PayPal response. Returns parsed array or throws exception
+	 * @author robmcvey
+	 * @param string $response
+	 * @return array
+	 */
+	public function handleResponse($response) {
+		
 		// Parse the guff that comes back from paypal
 		parse_str($response , $parsed);
 		
@@ -341,19 +307,19 @@ class PaypalComponent extends Component {
 		if(array_key_exists('ACK', $parsed) && $parsed['ACK'] == 'Success') {
 			return $parsed;
 		}
+		// Long message present
 		elseif(array_key_exists('ACK', $parsed) && array_key_exists('L_LONGMESSAGE0', $parsed) && $parsed['ACK'] != 'Success') {
-			$this->log($parsed , 'paypal');	
 			throw new Exception($parsed['ACK'] . ' : ' . $parsed['L_LONGMESSAGE0']);
 		}
+		// Error code present
 		elseif(array_key_exists('ACK', $parsed) && array_key_exists('L_ERRORCODE0', $parsed) && $parsed['ACK'] != 'Success') {
-			$this->log($parsed , 'paypal');	
 			throw new Exception($parsed['ACK'] . ' : ' . $parsed['L_ERRORCODE0']);
 		} 
+		// Some other combination is not possible AFAIK
 		else {
-			$this->log($parsed , 'paypal');
 			throw new Exception(__('There is a problem with the payment gateway. Please try again later.'));
 		}
-				
+
 	}
 		
 }
