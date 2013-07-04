@@ -19,7 +19,17 @@ class Paypal {
 /**
  * Live API endpoint
  */
-	public static $base_path = "https://api.paypal.com";
+	protected $liveEndpoint = "https://api.paypal.com";
+	
+/**
+ * Constructor. Takes API credentials.
+ *
+ * @return void
+ * @author Rob Mcvey
+ **/
+	public function __construct() {
+
+	}
 	
 /**
  * Returns the live Paypal API endpoint
@@ -27,8 +37,8 @@ class Paypal {
  * @return void
  * @author Rob Mcvey
  **/
-	public static function getEndpoint() {
-		return self::$base_path;
+	public function getEndpoint() {
+		return $this->liveEndpoint;
 	}
 	
 }

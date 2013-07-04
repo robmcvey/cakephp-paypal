@@ -24,6 +24,7 @@ class PaypalTestCase extends CakeTestCase {
  */
 	public function setUp() {
 		parent::setUp();
+		$this->Paypal = new Paypal();
 	}
 
 /**
@@ -33,6 +34,7 @@ class PaypalTestCase extends CakeTestCase {
  */
 	public function tearDown() {
 		parent::tearDown();
+		unset($this->Paypal);
 	}
 
 /**
@@ -42,7 +44,7 @@ class PaypalTestCase extends CakeTestCase {
  * @author Rob Mcvey
  **/
 	public function testGetEndpoint() {
-		$this->assertEqual("https://api.paypal.com" , Paypal::getEndpoint());
+		$this->assertEqual("https://api.paypal.com" , $this->Paypal->getEndpoint());
 	}
 	
 }
