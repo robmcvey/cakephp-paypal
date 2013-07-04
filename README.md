@@ -1,10 +1,8 @@
-# Paypal Utility for CakePHP 2.3.x
+# Paypal Utility for CakePHP 2.3.x (beta)
 
-A utility class to interact with Paypal's REST APIs [beta].
+A utility class to interact with Paypal's "classic" and new REST APIs.
 
 ### Requirements
 
 * CakePHP 2.3.x
-* A PayPal website payments pro account
-* A PayPal sandbox account for testing
 
