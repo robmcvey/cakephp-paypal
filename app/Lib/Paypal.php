@@ -10,12 +10,18 @@
  * @link          www.copify.com
  * @license       MIT License (http://www.opensource.org/licenses/mit-license.php)
  */
+App::uses('CakeRequest', 'Network');
 App::uses('HttpSocket', 'Network/Http');
 
 /**
  * Paypal class
  */
 class Paypal {
+
+/**
+ * Target version for "Classic" Paypal API
+ */
+	protected $paypalClassicApiVersion = '104.0';
 
 /**
  * Live or sandbox
@@ -93,22 +99,19 @@ class Paypal {
 	protected $sandboxPaypalLoginUri = 'https://www.sandbox.paypal.com/webscr';	
 
 /**
- * Default NVPs used when calling SetExpressCheckout.
- */	
-	protected $expressCheckoutDefaultNvps = array(
-		'METHOD' => 'SetExpressCheckout',
-		'VERSION' => '104.0',
-		'PAYMENTREQUEST_0_PAYMENTACTION' => 'Sale',
-	);
-
-/**
  * HttpSocket utility class
  */	
 	public $HttpSocket = null;
+
+/**
+ * CakeRequest
+ */	
+	public $CakeRequest = null;
 	
 /**
  * Constructor. Takes API credentials, and other properties to set (e.g sandbox mode)
  *
+ * @param array $config An array of properties to overide (e.g the API signature)
  * @return void
  * @author Rob Mcvey
  **/
@@ -126,23 +129,26 @@ class Paypal {
  * SetExpressCheckout
  * The SetExpressCheckout API operation initiates an Express Checkout transaction.
  *
- * @return void
+ * @param array $order Takes an array order (See tests for supported fields).
+ * @return string Will return the full URL to redirect the user to.
  * @author Rob Mcvey
  **/
-	public function setExpressCheckout($order, $nvps = array()) {		
+	public function setExpressCheckout($order) {		
+		// Build the NVPs
+		$nvps = $this->buildExpressCheckoutNvp($order);
+	
+		// HttpSocket
 		if (!$this->HttpSocket) {
 			$this->HttpSocket = new HttpSocket();
 		}
+		// Classic API endpoint
 		$endPoint = $this->getClassicEndpoint();
-		
-		// Build the NVPs
-		$nvps = $this->buildExpressCheckoutNvp($order);
 	
 		// Make a Http request for a new token
 		$response = $this->HttpSocket->post($endPoint , $nvps);
 		
 		// Parse the results
-		$parsed = $this->pasrseSetExpressCheckoutResponse($response);
+		$parsed = $this->parseClassicApiResponse($response);
 		
 		// Handle the resposne
 		if (isset($parsed['TOKEN']) && $parsed['ACK'] == "Success")  {
@@ -157,33 +163,210 @@ class Paypal {
 	}
 	
 /**
- * Build the login url for an express checkout payment
+ * GetExpressCheckoutDetails
+ * Call GetExpressCheckoutDetails to obtain customer information
+ * e.g. for customer review before payment
  *
- * @return string 
- * @param string $token
+ * @param string $token The token for this purchase (from Paypal, see SetExpressCheckout)
+ * @return array $parsed Returns an array containing details of the transaction/buyer
  * @author Rob Mcvey
  **/
-	public function expressCheckoutUrl($token) {
-		$endpoint = $this->getPaypalLoginUri();
-		return "$endpoint?cmd=_express-checkout&token=$token";
-	}
+	public function getExpressCheckoutDetails($token) {
+		// Build the NVPs (Named value pairs)	
+		$nvps = array(
+			'METHOD' => 'GetExpressCheckoutDetails' , 
+			'VERSION' => $this->paypalClassicApiVersion,
+			'TOKEN' => $token,
+			'USER' => $this->nvpUsername,
+			'PWD' => $this->nvpPassword,
+			'SIGNATURE' => $this->nvpSignature,
+		);
+		// HttpSocket
+		if (!$this->HttpSocket) {
+			$this->HttpSocket = new HttpSocket();
+		}
+		// Classic API endpoint
+		$endPoint = $this->getClassicEndpoint();
 
+		// Make a Http request for a new token
+		$response = $this->HttpSocket->post($endPoint , $nvps);
+		
+		// Parse the results
+		$parsed = $this->parseClassicApiResponse($response);
+		
+		// Handle the resposne
+		if (isset($parsed['TOKEN']) && $parsed['ACK'] == "Success")  {
+			return $parsed;
+		}
+		else if ($parsed['ACK'] == "Failure" && isset($parsed['L_SHORTMESSAGE0']))  {
+			throw new Exception($parsed['L_SHORTMESSAGE0']);
+		}
+		else {
+			throw new Exception(__d('paypal' , 'There was an error while connecting to Paypal'));
+		}
+	}
+	
 /**
- * Parse the body of the reponse from setExpressCheckout
+ * DoExpressCheckoutPayment
+ * The DoExpressCheckoutPayment API operation completes an Express Checkout transaction
  *
+ * @param array $order Takes an array order (See tests for supported fields).
+ * @param string $token The token for this purchase (from Paypal, see SetExpressCheckout)
+ * @param string $payerId The ID of the Paypal user making the purchase
+ * @return array Details of the completed transaction
+ * @author Rob Mcvey
+ **/
+	public function doExpressCheckoutPayment($order, $token , $payerId) {
+		// Build the NVPs
+		$nvps = $this->buildExpressCheckoutNvp($order);
+		
+		// When we call DoExpressCheckoutPayment, there are 3 NVPs that are different;
+		$keysToAdd = array(
+			'METHOD' => 'DoExpressCheckoutPayment',
+			'TOKEN' => $token,
+			'PAYERID' => $payerId,
+		);
+		
+		// Add/overite, we now habe our final NVPs
+		$finalNvps = array_merge($nvps, $keysToAdd);
+		
+		// HttpSocket
+		if (!$this->HttpSocket) {
+			$this->HttpSocket = new HttpSocket();
+		}
+		// Classic API endpoint
+		$endPoint = $this->getClassicEndpoint();
+
+		// Make a Http request for a new token
+		$response = $this->HttpSocket->post($endPoint , $finalNvps);
+		
+		// Parse the results
+		$parsed = $this->parseClassicApiResponse($response);
+		
+		// Handle the resposne
+		if (isset($parsed['TOKEN']) && $parsed['ACK'] == "Success")  {
+			return $parsed;
+		}
+		else if ($parsed['ACK'] == "Failure" && isset($parsed['L_SHORTMESSAGE0']))  {
+			throw new Exception($parsed['L_SHORTMESSAGE0']);
+		}
+		else {
+			throw new Exception(__d('paypal' , 'There was an error completing the payment'));
+		}
+	}	
+	
+/**
+ * DoDirectPayment
+ * The DoDirectPayment API Operation enables you to process a credit card payment.
+ *
+ * @param array $payment Credit card and amount details to process
  * @return void
  * @author Rob Mcvey
  **/
-	public function pasrseSetExpressCheckoutResponse($response) {
-		parse_str($response , $parsed);
-		return $parsed;
+	public function doDirectPayment($payment) {
+		$nvps = $this->formatDoDirectPaymentNvps($payment);
+		
+		// HttpSocket
+		if (!$this->HttpSocket) {
+			$this->HttpSocket = new HttpSocket();
+		}
+		// Classic API endpoint
+		$endPoint = $this->getClassicEndpoint();
+		
+		// Make a Http request for a new token
+		$response = $this->HttpSocket->post($endPoint , $nvps);
+		
+		// Parse the results
+		$parsed = $this->parseClassicApiResponse($response);
+		
+		// Handle the resposne
+		if (isset($parsed['ACK']) && $parsed['ACK'] == "Success")  {
+			return $parsed;
+		}
+		else if ($parsed['ACK'] == "Failure" && isset($parsed['L_SHORTMESSAGE0']))  {
+			throw new Exception($parsed['L_SHORTMESSAGE0']);
+		}
+		else {
+			throw new Exception(__d('paypal' , 'There was an error processing the card payment'));
+		}
+	}	
+	
+/**
+ * Takes a payment array anf formats in to the minimum NVPs to complete a payment
+ *
+ * @param array Credit card/amount information (see tests)
+ * @return array Formatted array of Paypal NVPs for DoDirectPayment
+ * @author Rob Mcvey
+ **/
+	public function formatDoDirectPaymentNvps($payment) {
+		// IP Address
+		if (!$this->CakeRequest) {
+			$this->CakeRequest = new CakeRequest();
+		}
+		$ipAddress = $this->CakeRequest->clientIp();
+		if (empty($ipAddress)) {
+			throw new Exception(__d('paypal' , 'Could not detect client IP address'));
+		}
+		
+		// Credit card number
+		if (!isset($payment['card'])) {
+			throw new Exception(__d('paypal' , 'Not a valid credit card number'));
+		}
+		$payment['card'] = preg_replace("/\s/" , "" , $payment['card']);
+		
+		// Credit card number
+		if (!isset($payment['cvv'])) {
+			throw new Exception(__d('paypal' , 'You must include the 3 digit security number'));
+		}
+		$payment['cvv'] = preg_replace("/\s/" , "" , $payment['cvv']);
+		
+		// Amount
+		if (!isset($payment['amount'])) {
+			throw new Exception(__d('paypal' , 'Must specify an "amount" to charge'));
+		}
+		
+		// Expiry
+		if (!isset($payment['expiry'])) {
+			throw new Exception(__d('paypal' , 'Must specify an expiry date'));
+		}
+		$dateKeys = array_keys($payment['expiry']);
+		sort($dateKeys); // Sort alphabetcially
+		if ($dateKeys != array('M' , 'Y')) {
+			throw new Exception(__d('paypal' , 'Must include a M and Y in expiry date'));
+		}
+		$month = $payment['expiry']['M'];
+		$year = $payment['expiry']['Y'];
+		$expiry = sprintf('%d%d' , $month, $year);
+		
+		$nvps = array(
+			'METHOD' => 'DoDirectPayment',
+			'VERSION' => $this->paypalClassicApiVersion,
+			'USER' => $this->nvpUsername,
+			'PWD' => $this->nvpPassword,
+			'SIGNATURE' => $this->nvpSignature,
+			'IPADDRESS' => $ipAddress, 		// Required
+			'AMT' => $payment['amount'], 	// The total cost of the transaction
+			'CURRENCYCODE' => 'GBP',		// A 3-character currency code
+			'RECURRING' => 'N',				// Recurring flag
+			'ACCT' => $payment['card'],		// Numeric characters only with no spaces
+			'EXPDATE' => $expiry,			// MMYYYY
+			'CVV2' => $payment['cvv'],		// xxx
+			'FIRSTNAME' => '',				// Required
+			'LASTNAME' => '', 				// Required
+			'STREET' => '', 				// Required
+			'CITY' => '', 					// Required
+			'STATE' => '', 					// Required
+			'COUNTRYCODE' => '',			// Required 2 single-byte characters
+			'ZIP' => '', 					// Required
+		);
+		return $nvps;
 	}
 
 /**
  * Formats the order array to Paypal nvps
  *
- * @return void
- * @param array
+ * @param array $order Takes an array order (See tests for supported fields).
+ * @return array Formatted array of Paypal NVPs for setExpressCheckout
  * @author Rob Mcvey
  **/
 	public function buildExpressCheckoutNvp($order) {
@@ -196,14 +379,18 @@ class Paypal {
 		if (!isset($order['currency']))  {
 			throw new Exception(__d('paypal' , 'You must provide a currency code'));
 		}
-		$nvps = $this->getExpressCheckoutDefaultNvps();
-		$nvps['USER'] = $this->nvpUsername;
-		$nvps['PWD'] = $this->nvpPassword;
-		$nvps['SIGNATURE'] = $this->nvpSignature;
-		$nvps['RETURNURL'] = $order['return'];
-		$nvps['CANCELURL'] = $order['cancel'];
-		$nvps['PAYMENTREQUEST_0_CURRENCYCODE'] = $order['currency'];
-		$nvps['PAYMENTREQUEST_0_DESC'] = $order['description'];
+		$nvps = array(
+			'METHOD' => 'SetExpressCheckout',
+			'VERSION' => $this->paypalClassicApiVersion,
+			'PAYMENTREQUEST_0_PAYMENTACTION' => 'Sale',
+			'USER' => $this->nvpUsername,
+			'PWD' => $this->nvpPassword,
+			'SIGNATURE' => $this->nvpSignature,
+			'RETURNURL' => $order['return'],
+			'CANCELURL' => $order['cancel'],
+			'PAYMENTREQUEST_0_CURRENCYCODE' => $order['currency'],
+			'PAYMENTREQUEST_0_DESC' => $order['description'],
+		);		
 		
 		// Custom field?
 		if (isset($order['custom'])) {
@@ -222,7 +409,7 @@ class Paypal {
 			$nvps['PAYMENTREQUEST_0_AMT'] = $items_total;
 			// Paypal only supports 10 items in express checkout
 			if (count($order['items']) > 10) {
-				return $this->setExpressCheckoutDefaultNvps($nvps);
+				return $nvps;
 			}
 			foreach ($order['items'] as $m => $item) {
 				$nvps["L_PAYMENTREQUEST_0_NAME$m"] = $item['name'];
@@ -232,56 +419,13 @@ class Paypal {
 				$nvps["L_PAYMENTREQUEST_0_QTY$m"] = 1;
 			}
 		}
-		return $this->setExpressCheckoutDefaultNvps($nvps);
+		return $nvps;
 	}
 	
 /**
- * Add/merge NVPs to the express checkout defaults
+ * Returns the Paypal REST API endpoint
  *
- * @return void
- * @author Rob Mcvey
- **/
-	public function setExpressCheckoutDefaultNvps($nvps) {
-		$this->expressCheckoutDefaultNvps = array_merge(
-			$this->expressCheckoutDefaultNvps , $nvps
-		);
-		return $this->getExpressCheckoutDefaultNvps();
-	}
-	
-/**
- * Returns expressCheckoutDefaultNvps
- *
- * @return void
- * @author Rob Mcvey
- **/
-	public function getExpressCheckoutDefaultNvps() {
-		return $this->expressCheckoutDefaultNvps;
-	}
-	
-/**
- * DoExpressCheckoutPayment
- *
- * @return void
- * @author Rob Mcvey
- **/
-	public function doExpressCheckoutPayment() {
-
-	}
-
-/**
- * GetExpressCheckoutDetails
- *
- * @return void
- * @author Rob Mcvey
- **/
-	public function getExpressCheckoutDetails() {
-
-	}
-
-/**
- * Returns the live Paypal REST API endpoint
- *
- * @return void
+ * @return string
  * @author Rob Mcvey
  **/
 	public function getRestEndpoint() {
@@ -294,7 +438,7 @@ class Paypal {
 /**
  * Returns the Paypal Classic API endpoint
  *
- * @return void
+ * @return string
  * @author Rob Mcvey
  **/
 	public function getClassicEndpoint() {
@@ -307,7 +451,7 @@ class Paypal {
 /**
  * Returns the Paypal login URL for express checkout
  *
- * @return void
+ * @return string
  * @author Rob Mcvey
  **/
 	public function getPaypalLoginUri() {
@@ -315,6 +459,30 @@ class Paypal {
 			return $this->sandboxPaypalLoginUri;
 		}
 		return $this->livePaypalLoginUri;
+	}	
+
+/**
+ * Build the login url for an express checkout payment, user is redirected to this
+ *
+ * @param string $token 
+ * @return string 
+ * @author Rob Mcvey
+ **/
+	public function expressCheckoutUrl($token) {
+		$endpoint = $this->getPaypalLoginUri();
+		return "$endpoint?cmd=_express-checkout&token=$token";
+	}
+
+/**
+ * Parse the body of the reponse from setExpressCheckout
+ *
+ * @param string A URL encoded response from Paypal
+ * @return array Nicely parsed array
+ * @author Rob Mcvey
+ **/
+	public function parseClassicApiResponse($response) {
+		parse_str($response , $parsed);
+		return $parsed;
 	}	
 	
 }
