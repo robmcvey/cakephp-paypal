@@ -89,7 +89,7 @@ $order = array(
 	)
 );
 
-$this->Paypal->doExpressCheckoutPayment($order , $token , $payerId);
+$this->Paypal->doExpressCheckoutPayment($order, $token, $payerId);
 ```
 
 ## DoDirectPayment
