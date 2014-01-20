@@ -7,11 +7,39 @@ A utility class to interact with Paypal's "classic" and new REST APIs.
 * CakePHP 2.3.x
 * A PayPal Website Payments Pro account
 
-### Usuage
+### Installation
+
+_[Manual]_
+
+* Download this: [http://github.com/robmcvey/cakephp-paypal/zipball/master](http://github.com/robmcvey/cakephp-paypal/zipball/master)
+* Unzip that download.
+* Copy the resulting folder to `app/Plugin`
+* Rename the folder you just copied to `Paypal`
+
+_[GIT Submodule]_
+
+In your app directory type:
+
+```shell
+git submodule add -b master git://github.com/robmcvey/cakephp-paypal.git Plugin/Paypal
+git submodule init
+git submodule update
+```
+
+_[GIT Clone]_
+
+In your `Plugin` directory type:
+
+```shell
+git clone -b master git://github.com/robmcvey/cakephp-paypal.git Paypal
+```
+
+### Usage
 
 Create an instance of the class with your PayPal credentials. For testing purposes, ensure `sandboxMode` is set to `true`.
 
 ```php
+App::uses('Paypal', 'Paypal.Lib');
 $this->Paypal = new Paypal(array(
 	'sandboxMode' => true,
 	'nvpUsername' => '{username}',
