@@ -1,10 +1,10 @@
-# Paypal Utility for CakePHP 2.3.x
+# Paypal Plugin for CakePHP 2.x
 
-A utility class to interact with Paypal's "classic" and new REST APIs.
+A CakePHP plugin to interact with Paypal's "classic" and new REST APIs.
 
 ### Requirements
 
-* CakePHP 2.3.x
+* CakePHP 2.x
 * A PayPal Website Payments Pro account
 
 ### Installation
@@ -40,6 +40,7 @@ Create an instance of the class with your PayPal credentials. For testing purpos
 
 ```php
 App::uses('Paypal', 'Paypal.Lib');
+
 $this->Paypal = new Paypal(array(
 	'sandboxMode' => true,
 	'nvpUsername' => '{username}',
