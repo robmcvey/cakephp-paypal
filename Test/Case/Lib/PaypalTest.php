@@ -10,7 +10,7 @@
  * @link          www.copify.com
  * @license       MIT License (http://www.opensource.org/licenses/mit-license.php)
  */
-App::uses('Paypal', 'Lib');
+App::uses('Paypal', 'Paypal.Lib');
 
 /**
  * PaypalTest class
