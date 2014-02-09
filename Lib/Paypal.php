@@ -568,6 +568,11 @@ class Paypal {
 			$nvps['PAYMENTREQUEST_0_CUSTOM'] = $order['custom'];
 		}
 
+		// Notify URL?
+		if (isset($order['notifyUrl'])) {
+			$nvps['PAYMENTREQUEST_0_NOTIFYURL'] = $order['notifyUrl'];
+		}
+
 		// Add up each item and calculate totals
 		if (isset($order['items']) && is_array($order['items'])) {
 			$items_subtotal = array_sum(Hash::extract($order , 'items.{n}.subtotal'));
