@@ -36,6 +36,15 @@ git clone -b master git://github.com/robmcvey/cakephp-paypal.git Paypal
 
 ### Usage
 
+Make sure the plugin is loaded in `app/Config/bootstrap.php`.
+
+You can either load them one by one or all of them in a single call:
+
+```
+CakePlugin::loadAll(); 		// Loads all plugins at once
+CakePlugin::load('Paypal'); 	// Loads a single plugin named Paypal
+```
+
 Create an instance of the class with your PayPal credentials. For testing purposes, ensure `sandboxMode` is set to `true`.
 
 ```php
