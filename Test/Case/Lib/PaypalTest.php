@@ -1099,6 +1099,7 @@ class PaypalTestCase extends CakeTestCase {
 			'return' => 'https://www.my-amazing-clothes-store.com/review-paypal.php',
 			'cancel' => 'https://www.my-amazing-clothes-store.com/checkout.php',
 			'custom' => 'bingbong',
+			'notifyUrl' => 'http://www.my-ipn-listener-url.com/some-where.php',
 			'items' => array(
 				0 => array(
 					'name' => 'Blue shoes',
@@ -1132,6 +1133,7 @@ class PaypalTestCase extends CakeTestCase {
 			'PAYMENTREQUEST_0_AMT' => 20.00,
 			'PAYMENTREQUEST_0_DESC' => 'Your purchase with Acme clothes store',
 			'PAYMENTREQUEST_0_CUSTOM' => 'bingbong',
+			'PAYMENTREQUEST_0_NOTIFYURL' => 'http://www.my-ipn-listener-url.com/some-where.php',
 			'L_PAYMENTREQUEST_0_NAME0' => 'Blue shoes',
 			'L_PAYMENTREQUEST_0_DESC0' => 'A pair of really great blue shoes',
 			'L_PAYMENTREQUEST_0_TAXAMT0' => 2.00,
