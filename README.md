@@ -143,7 +143,25 @@ $payment = array(
 		'Y' => '2016',
 	),
 	'cvv' => '321',
+	'currency => 'USD' // Defaults to GBP if not provided
 );
 
 $this->Paypal->doDirectPayment($payment);
+```
+
+## RefundTransaction
+
+Refund a transction. Transactions can only be refunded up to 60 days after the completion date.
+
+```php
+$refund = array(
+	'transactionId' => '96L684679W100181R' // Original PayPal Transcation ID
+	'type' => 'Partial', // Full, Partial, ExternalDispute, Other
+	'amount' => 30.00, // Amount to refund, only required if Refund Type is Partial
+	'note' => 'Refund because we are nice',  // Optional note to customer
+	'reference' => 'abc123',  // Optional internal reference
+	'currency' => 'USD'  // Defaults to GBP if not provided
+);
+
+$this->Paypal->refundTransaction($refund);
 ```

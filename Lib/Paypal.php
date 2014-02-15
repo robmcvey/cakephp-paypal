@@ -463,6 +463,47 @@ class Paypal {
 	}
 
 /**
+ * RefundTransaction
+ * The RefundTransaction API Operation enables you to refund a transaction that is less than 60 days old.
+ *
+ * @param array $refund original transaction information and amount to refund
+ * @return void
+ * @author James Mikkelson
+ **/
+	public function refundTransaction($refund) {
+
+        try {
+            $nvps = $this->formatRefundTransactionNvps($refund);
+
+            // HttpSocket
+            if (!$this->HttpSocket) {
+                $this->HttpSocket = new HttpSocket();
+            }
+            // Classic API endpoint
+            $endPoint = $this->getClassicEndpoint();
+
+            // Make a Http request for a new token
+            $response = $this->HttpSocket->post($endPoint , $nvps);
+
+            // Parse the results
+            $parsed = $this->parseClassicApiResponse($response);
+
+            // Handle the resposne
+            if (isset($parsed['ACK']) && $parsed['ACK'] == "Success")  {
+                return $parsed;
+            }
+            else if ($parsed['ACK'] == "Failure" && isset($parsed['L_LONGMESSAGE0']))  {
+                throw new PaypalException($this->getErrorMessage($parsed));
+            }
+            else {
+                throw new PaypalException(__d('paypal' , 'There was an error processing the the refund'));
+            }
+        } catch (SocketException $e) {
+            throw new PaypalException(__d('paypal', 'A problem occurred during the refund process, please try again.'));
+        }
+	}
+
+/**
  * Takes a payment array and formats in to the minimum NVPs to complete a payment
  *
  * @param array Credit card/amount information (see tests)
@@ -509,6 +550,11 @@ class Paypal {
 		$year = $payment['expiry']['Y'];
 		$expiry = sprintf('%d%d' , $month, $year);
 
+		$currency = 'GBP';
+		if(isset($payment['currency'])){
+			$currency = strtoupper($payment['currency']);
+		}
+
 		$nvps = array(
 			'METHOD' => 'DoDirectPayment',
 			'VERSION' => $this->paypalClassicApiVersion,
@@ -517,7 +563,7 @@ class Paypal {
 			'SIGNATURE' => $this->nvpSignature,
 			'IPADDRESS' => $ipAddress, 		// Required
 			'AMT' => $payment['amount'], 		// The total cost of the transaction
-			'CURRENCYCODE' => 'GBP',		// A 3-character currency code
+			'CURRENCYCODE' => $currency,		// A 3-character currency code
 			'RECURRING' => 'N',			// Recurring flag
 			'ACCT' => $payment['card'],		// Numeric characters only with no spaces
 			'EXPDATE' => $expiry,			// MMYYYY
@@ -595,6 +641,72 @@ class Paypal {
 				$nvps["L_PAYMENTREQUEST_0_QTY$m"] = 1;
 			}
 		}
+		return $nvps;
+	}
+
+/**
+ * Takes a refund transaction array and formats in to the minimum NVPs to process a refund
+ *
+ * @param array original transaction details and refund amount
+ * @return array Formatted array of Paypal NVPs for RefundTransaction
+ * @author James Mikkelson
+ **/
+	public function formatRefundTransactionNvps($refund) {
+
+		// PayPal Transcation ID
+		if (!isset($refund['transactionId'])) {
+			throw new PaypalException(__d('paypal' , 'Original PayPal Transaction ID is required'));
+		}
+		$refund['transactionId'] = preg_replace("/\s/" , "" , $refund['transactionId']);
+
+		// Amount to refund
+		if (!isset($refund['amount'])) {
+			throw new PaypalException(__d('paypal' , 'Must specify an "amount" to refund'));
+		}
+		
+		// Type of refund
+		if (!isset($refund['type'])) {
+			throw new PaypalException(__d('paypal' , 'You must specify a refund type, such as Full or Partial'));
+		}
+
+		$reference = '';
+		if(isset($refund['reference'])){
+			$reference = $refund['reference'];
+		}
+
+		$note = false;
+		if(isset($refund['note'])){
+			$note = substr($refund['note'], 0, 255);
+		}
+
+		$currency = 'GBP';
+		if(isset($refund['currency'])){
+			$currency = strtoupper($refund['currency']);
+		}
+
+		$source = 'any';
+		if(isset($refund['source'])){
+			$source = $refund['source'];
+		}
+
+		$nvps = array(
+			'METHOD' => 'RefundTransaction',
+			'VERSION' => $this->paypalClassicApiVersion,
+			'USER' => $this->nvpUsername,
+			'PWD' => $this->nvpPassword,
+			'SIGNATURE' => $this->nvpSignature,
+			'TRANSACTIONID' => $refund['transactionId'],	// The orginal PayPal Transaction ID
+			'INVOICEID' => $reference,			// Your own reference or invoice number
+			'REFUNDTYPE' => $refund['type'],		// Full, Partial, ExternalDispute, Other
+			'CURRENCYCODE' => $currency, 			// Only required for partial refunds or refunds greater than 100%
+			'NOTE' => $note,				// Up to 255 characters of information displayed to customer
+			'REFUNDSOURCE' => $source,			// any, default, instant, eCheck		
+		);	
+
+		if($refund['type']=='Partial'){
+			$nvps['AMT'] = $refund['amount']; 		// Refund amount, only set if REFUNDTYPE is Partial
+		}
+
 		return $nvps;
 	}
 
