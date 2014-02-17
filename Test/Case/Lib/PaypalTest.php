@@ -1510,6 +1510,7 @@ class PaypalTestCase extends CakeTestCase {
 			'REFUNDSOURCE' => 'tomato',
 			'AMT' => '40.00'
 		);
+		$this->assertEqual($expected, $nvps);
 	}
 
 /**
