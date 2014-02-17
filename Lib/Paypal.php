@@ -652,7 +652,6 @@ class Paypal {
  * @author James Mikkelson
  **/
 	public function formatRefundTransactionNvps($refund) {
-
 		// PayPal Transcation ID
 		if (!isset($refund['transactionId'])) {
 			throw new PaypalException(__d('paypal' , 'Original PayPal Transaction ID is required'));
@@ -668,27 +667,21 @@ class Paypal {
 		if (!isset($refund['type'])) {
 			throw new PaypalException(__d('paypal' , 'You must specify a refund type, such as Full or Partial'));
 		}
-
-		$reference = '';
-		if(isset($refund['reference'])){
-			$reference = $refund['reference'];
-		}
+		// Set reference
+		$reference = (isset($refund['reference'])) ? $refund['reference'] : '';
 
 		$note = false;
 		if(isset($refund['note'])){
 			$note = substr($refund['note'], 0, 255);
 		}
-
 		$currency = 'GBP';
-		if(isset($refund['currency'])){
+		if (isset($refund['currency'])) {
 			$currency = strtoupper($refund['currency']);
 		}
-
 		$source = 'any';
-		if(isset($refund['source'])){
+		if (isset($refund['source'])) {
 			$source = $refund['source'];
 		}
-
 		$nvps = array(
 			'METHOD' => 'RefundTransaction',
 			'VERSION' => $this->paypalClassicApiVersion,
@@ -696,17 +689,15 @@ class Paypal {
 			'PWD' => $this->nvpPassword,
 			'SIGNATURE' => $this->nvpSignature,
 			'TRANSACTIONID' => $refund['transactionId'],	// The orginal PayPal Transaction ID
-			'INVOICEID' => $reference,			// Your own reference or invoice number
-			'REFUNDTYPE' => $refund['type'],		// Full, Partial, ExternalDispute, Other
-			'CURRENCYCODE' => $currency, 			// Only required for partial refunds or refunds greater than 100%
-			'NOTE' => $note,				// Up to 255 characters of information displayed to customer
-			'REFUNDSOURCE' => $source,			// any, default, instant, eCheck		
+			'INVOICEID' => $reference,						// Your own reference or invoice number
+			'REFUNDTYPE' => $refund['type'],				// Full, Partial, ExternalDispute, Other
+			'CURRENCYCODE' => $currency, 					// Only required for partial refunds or refunds greater than 100%
+			'NOTE' => $note,								// Up to 255 characters of information displayed to customer
+			'REFUNDSOURCE' => $source,						// any, default, instant, eCheck		
 		);	
-
-		if($refund['type']=='Partial'){
-			$nvps['AMT'] = $refund['amount']; 		// Refund amount, only set if REFUNDTYPE is Partial
+		if ($refund['type'] == 'Partial') {
+			$nvps['AMT'] = $refund['amount']; // Refund amount, only set if REFUNDTYPE is Partial
 		}
-
 		return $nvps;
 	}
 
