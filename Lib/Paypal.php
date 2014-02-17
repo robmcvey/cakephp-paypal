@@ -669,19 +669,12 @@ class Paypal {
 		}
 		// Set reference
 		$reference = (isset($refund['reference'])) ? $refund['reference'] : '';
-
-		$note = false;
-		if(isset($refund['note'])){
-			$note = substr($refund['note'], 0, 255);
-		}
-		$currency = 'GBP';
-		if (isset($refund['currency'])) {
-			$currency = strtoupper($refund['currency']);
-		}
-		$source = 'any';
-		if (isset($refund['source'])) {
-			$source = $refund['source'];
-		}
+		// Set note
+		$note = (isset($refund['note'])) ? $refund['note'] : false;
+		// Currency
+		$currency = (isset($refund['currency'])) ? $refund['currency'] : 'GBP';
+		// Source
+		$source = (isset($refund['source'])) ? $refund['source'] : 'any';
 		$nvps = array(
 			'METHOD' => 'RefundTransaction',
 			'VERSION' => $this->paypalClassicApiVersion,
