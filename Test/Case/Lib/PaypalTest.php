@@ -1457,7 +1457,59 @@ class PaypalTestCase extends CakeTestCase {
 			'type' => 'Full'
 		);
 		$nvps = $this->Paypal->formatRefundTransactionNvps($refund);
-		debug($nvps);
-	}		
+		$expected = array(
+			'METHOD' => 'RefundTransaction',
+			'VERSION' => '104.0',
+			'USER' => 'foo',
+			'PWD' => 'bar',
+			'SIGNATURE' => 'foobar',
+			'TRANSACTIONID' => 'XYZ',
+			'INVOICEID' => '',
+			'REFUNDTYPE' => 'Full',
+			'CURRENCYCODE' => 'GBP',
+			'NOTE' => false,
+			'REFUNDSOURCE' => 'any'
+		);
+		$this->assertEqual($expected, $nvps);
+	}
+	
+/**
+ * testFormatRefundTransactionNvpsWithOptions
+ *
+ * @return void
+ * @author Rob Mcvey
+ **/
+	public function testFormatRefundTransactionNvpsWithOptions() {
+		$this->Paypal = new Paypal(array(
+			'sandboxMode' => true,
+			'nvpUsername' => 'foo',
+			'nvpPassword' => 'bar',
+			'nvpSignature' => 'foobar'
+		));
+		$refund = array(
+			'transactionId' => 'XYZ',
+			'amount' => '40.00',
+			'type' => 'Partial',
+			'source' => 'tomato',
+			'currency' => 'AUD',
+			'note' => 'Here is your refund do try not to spend it all at once',
+			'reference' => '345SGS24afsdfsFASD',
+		);
+		$nvps = $this->Paypal->formatRefundTransactionNvps($refund);
+		$expected = array(
+			'METHOD' => 'RefundTransaction',
+			'VERSION' => '104.0',
+			'USER' => 'foo',
+			'PWD' => 'bar',
+			'SIGNATURE' => 'foobar',
+			'TRANSACTIONID' => 'XYZ',
+			'INVOICEID' => '345SGS24afsdfsFASD',
+			'REFUNDTYPE' => 'Partial',
+			'CURRENCYCODE' => 'AUD',
+			'NOTE' => 'Here is your refund do try not to spend it all at once',
+			'REFUNDSOURCE' => 'tomato',
+			'AMT' => '40.00'
+		);
+	}	
 
 }
