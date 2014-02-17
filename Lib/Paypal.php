@@ -675,6 +675,7 @@ class Paypal {
 		$currency = (isset($refund['currency'])) ? $refund['currency'] : 'GBP';
 		// Source
 		$source = (isset($refund['source'])) ? $refund['source'] : 'any';
+		// Build our NVPs for the request
 		$nvps = array(
 			'METHOD' => 'RefundTransaction',
 			'VERSION' => $this->paypalClassicApiVersion,
@@ -688,8 +689,9 @@ class Paypal {
 			'NOTE' => $note,								// Up to 255 characters of information displayed to customer
 			'REFUNDSOURCE' => $source,						// any, default, instant, eCheck		
 		);	
+		// Refund amount, only set if REFUNDTYPE is Partial
 		if ($refund['type'] == 'Partial') {
-			$nvps['AMT'] = $refund['amount']; // Refund amount, only set if REFUNDTYPE is Partial
+			$nvps['AMT'] = $refund['amount']; 
 		}
 		return $nvps;
 	}
