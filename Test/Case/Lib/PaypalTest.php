@@ -1436,6 +1436,28 @@ class PaypalTestCase extends CakeTestCase {
 			'amount' => '40.00'
 		);
 		$this->Paypal->formatRefundTransactionNvps($refund);
-	}	
+	}
+	
+/**
+ * testFormatRefundTransactionNvps
+ *
+ * @return void
+ * @author Rob Mcvey
+ **/
+	public function testFormatRefundTransactionNvps() {
+		$this->Paypal = new Paypal(array(
+			'sandboxMode' => true,
+			'nvpUsername' => 'foo',
+			'nvpPassword' => 'bar',
+			'nvpSignature' => 'foobar'
+		));
+		$refund = array(
+			'transactionId' => 'XYZ',
+			'amount' => '40.00',
+			'type' => 'Full'
+		);
+		$nvps = $this->Paypal->formatRefundTransactionNvps($refund);
+		debug($nvps);
+	}		
 
 }
