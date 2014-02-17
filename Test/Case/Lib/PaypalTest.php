@@ -1487,7 +1487,7 @@ class PaypalTestCase extends CakeTestCase {
 			'nvpSignature' => 'foobar'
 		));
 		$refund = array(
-			'transactionId' => 'XYZ',
+			'transactionId' => 'XYZ 123',
 			'amount' => '40.00',
 			'type' => 'Partial',
 			'source' => 'tomato',
@@ -1502,7 +1502,7 @@ class PaypalTestCase extends CakeTestCase {
 			'USER' => 'foo',
 			'PWD' => 'bar',
 			'SIGNATURE' => 'foobar',
-			'TRANSACTIONID' => 'XYZ',
+			'TRANSACTIONID' => 'XYZ123',
 			'INVOICEID' => '345SGS24afsdfsFASD',
 			'REFUNDTYPE' => 'Partial',
 			'CURRENCYCODE' => 'AUD',

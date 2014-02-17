@@ -472,30 +472,30 @@ class Paypal {
  **/
 	public function refundTransaction($refund) {
         try {
-            $nvps = $this->formatRefundTransactionNvps($refund);
-            // HttpSocket
-            if (!$this->HttpSocket) {
-                $this->HttpSocket = new HttpSocket();
-            }
-            // Classic API endpoint
-            $endPoint = $this->getClassicEndpoint();
-            // Make a Http request for a new token
-            $response = $this->HttpSocket->post($endPoint , $nvps);
-            // Parse the results
-            $parsed = $this->parseClassicApiResponse($response);
-            // Handle the resposne
-            if (isset($parsed['ACK']) && $parsed['ACK'] == "Success")  {
-                return $parsed;
-            }
-            elseif ($parsed['ACK'] == "Failure" && isset($parsed['L_LONGMESSAGE0']))  {
-                throw new PaypalException($this->getErrorMessage($parsed));
-            }
-            else {
-                throw new PaypalException(__d('paypal' , 'There was an error processing the the refund'));
-            }
-        } catch (SocketException $e) {
-            throw new PaypalException(__d('paypal', 'A problem occurred during the refund process, please try again.'));
-        }
+			$nvps = $this->formatRefundTransactionNvps($refund);
+			// HttpSocket
+			if (!$this->HttpSocket) {
+				$this->HttpSocket = new HttpSocket();
+			}
+			// Classic API endpoint
+			$endPoint = $this->getClassicEndpoint();
+			// Make a Http request for a new token
+			$response = $this->HttpSocket->post($endPoint , $nvps);
+			// Parse the results
+			$parsed = $this->parseClassicApiResponse($response);
+			// Handle the resposne
+			if (isset($parsed['ACK']) && $parsed['ACK'] == "Success")  {
+				return $parsed;
+			}
+			elseif ($parsed['ACK'] == "Failure" && isset($parsed['L_LONGMESSAGE0']))  {
+				throw new PaypalException($this->getErrorMessage($parsed));
+			}
+			else {
+				throw new PaypalException(__d('paypal' , 'There was an error processing the the refund'));
+			}
+		} catch (SocketException $e) {
+			throw new PaypalException(__d('paypal', 'A problem occurred during the refund process, please try again.'));
+		}
 	}
 
 /**
@@ -652,7 +652,6 @@ class Paypal {
 			throw new PaypalException(__d('paypal' , 'Original PayPal Transaction ID is required'));
 		}
 		$refund['transactionId'] = preg_replace("/\s/" , "" , $refund['transactionId']);
-
 		// Amount to refund
 		if (!isset($refund['amount'])) {
 			throw new PaypalException(__d('paypal' , 'Must specify an "amount" to refund'));
