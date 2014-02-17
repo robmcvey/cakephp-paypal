@@ -1375,5 +1375,67 @@ class PaypalTestCase extends CakeTestCase {
 		);
 		$this->assertEqual($expected , $result);
 	}
+	
+/**
+ * testFormatRefundTransactionNvpsMissingTransId
+ *
+ * @return void
+ * @author Rob Mcvey
+ * @expectedException PaypalException
+ * @expectedException Original PayPal Transaction ID is required
+ **/
+	public function testFormatRefundTransactionNvpsMissingTransId() {
+		$this->Paypal = new Paypal(array(
+			'sandboxMode' => true,
+			'nvpUsername' => 'foo',
+			'nvpPassword' => 'bar',
+			'nvpSignature' => 'foobar'
+		));
+		$refund = array();
+		$this->Paypal->formatRefundTransactionNvps($refund);
+	}
+	
+/**
+ * testFormatRefundTransactionNvpsMissingAmt
+ *
+ * @return void
+ * @author Rob Mcvey
+ * @expectedException PaypalException
+ * @expectedException Must specify an "amount" to refund
+ **/
+	public function testFormatRefundTransactionNvpsMissingAmt() {
+		$this->Paypal = new Paypal(array(
+			'sandboxMode' => true,
+			'nvpUsername' => 'foo',
+			'nvpPassword' => 'bar',
+			'nvpSignature' => 'foobar'
+		));
+		$refund = array(
+			'transactionId' => 'XYZ'
+		);
+		$this->Paypal->formatRefundTransactionNvps($refund);
+	}
+	
+/**
+ * testFormatRefundTransactionNvpsMissingType
+ *
+ * @return void
+ * @author Rob Mcvey
+ * @expectedException PaypalException
+ * @expectedException You must specify a refund type, such as Full or Partial
+ **/
+	public function testFormatRefundTransactionNvpsMissingType() {
+		$this->Paypal = new Paypal(array(
+			'sandboxMode' => true,
+			'nvpUsername' => 'foo',
+			'nvpPassword' => 'bar',
+			'nvpSignature' => 'foobar'
+		));
+		$refund = array(
+			'transactionId' => 'XYZ',
+			'amount' => '40.00'
+		);
+		$this->Paypal->formatRefundTransactionNvps($refund);
+	}	
 
 }
