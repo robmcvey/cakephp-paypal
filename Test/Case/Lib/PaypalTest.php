@@ -1510,6 +1510,130 @@ class PaypalTestCase extends CakeTestCase {
 			'REFUNDSOURCE' => 'tomato',
 			'AMT' => '40.00'
 		);
-	}	
+	}
+
+/**
+ * testRefundTransactionRequest
+ *
+ * @return void
+ * @author Rob Mcvey
+ **/
+	public function testRefundTransactionRequest() {
+		$this->Paypal = new Paypal(array(
+			'sandboxMode' => true,
+			'nvpUsername' => 'foo',
+			'nvpPassword' => 'bar',
+			'nvpSignature' => 'foobar'
+		));
+		$refund = array(
+			'transactionId' => '0D4480860X580710H',
+			'amount' => '60.00',
+			'type' => 'Full',
+			'source' => 'tomato',
+			'currency' => 'GBP',
+			'note' => 'Here is your refund do try not to spend it all at once',
+			'reference' => '4324',
+		);
+		$expectedNvps = array(
+			'METHOD' => 'RefundTransaction',
+			'VERSION' => '104.0',
+			'USER' => 'foo',
+			'PWD' => 'bar',
+			'SIGNATURE' => 'foobar',
+			'TRANSACTIONID' => '0D4480860X580710H',
+			'INVOICEID' => '4324',
+			'REFUNDTYPE' => 'Full',
+			'CURRENCYCODE' => 'GBP',
+			'NOTE' => 'Here is your refund do try not to spend it all at once',
+			'REFUNDSOURCE' => 'tomato',
+		);
+		$expectedEndpoint = 'https://api-3t.sandbox.paypal.com/nvp';
+			$mockResponse = 'REFUNDTRANSACTIONID=17U98664L1321363R&FEEREFUNDAMT=2%2e04&GROSSREFUNDAMT=60%2e00&NETREFUNDAMT=57%2e96&CURRENCYCODE=GBP&TOTALREFUNDEDAMOUNT=60%2e00&TIMESTAMP=2014%2d02%2d17T16%3a31%3a14Z&CORRELATIONID=e46d51aadf37&ACK=Success&VERSION=104%2e0&BUILD=9720069&REFUNDSTATUS=Instant&PENDINGREASON=None';
+			$this->Paypal->HttpSocket = $this->getMock('HttpSocket');
+			$this->Paypal->HttpSocket->expects($this->once())
+				->method('post')
+				->with($this->equalTo($expectedEndpoint) , $this->equalTo($expectedNvps))
+				->will($this->returnValue($mockResponse));
+		$result = $this->Paypal->refundTransaction($refund);
+		$expectedParsedResponse = array(
+			'REFUNDTRANSACTIONID' => '17U98664L1321363R',
+			'FEEREFUNDAMT' => '2.04',
+			'GROSSREFUNDAMT' => '60.00',
+			'NETREFUNDAMT' => '57.96',
+			'CURRENCYCODE' => 'GBP',
+			'TOTALREFUNDEDAMOUNT' => '60.00',
+			'TIMESTAMP' => '2014-02-17T16:31:14Z',
+			'CORRELATIONID' => 'e46d51aadf37',
+			'ACK' => 'Success',
+			'VERSION' => '104.0',
+			'BUILD' => '9720069',
+			'REFUNDSTATUS' => 'Instant',
+			'PENDINGREASON' => 'None'
+		);
+		$this->assertEqual($expectedParsedResponse, $result);
+	}		
+	
+/**
+ * testRefundTransactionRequestPartial
+ *
+ * @return void
+ * @author Rob Mcvey
+ **/
+	public function testRefundTransactionRequestPartial() {
+		$this->Paypal = new Paypal(array(
+			'sandboxMode' => true,
+			'nvpUsername' => 'foo',
+			'nvpPassword' => 'bar',
+			'nvpSignature' => 'foobar'
+		));
+		$refund = array(
+			'transactionId' => '3L696641B2868664L',
+			'amount' => '10.00',
+			'type' => 'Partial',
+			'source' => 'tomato',
+			'currency' => 'GBP',
+			'note' => 'Here is your refund do try not to spend it all at once',
+			'reference' => '4323',
+		);
+		$expectedNvps = array(
+			'METHOD' => 'RefundTransaction',
+			'VERSION' => '104.0',
+			'USER' => 'foo',
+			'PWD' => 'bar',
+			'SIGNATURE' => 'foobar',
+			'TRANSACTIONID' => '3L696641B2868664L',
+			'INVOICEID' => '4323',
+			'REFUNDTYPE' => 'Partial',
+			'CURRENCYCODE' => 'GBP',
+			'NOTE' => 'Here is your refund do try not to spend it all at once',
+			'REFUNDSOURCE' => 'tomato',
+			'AMT' => '10.00'
+		);
+		$expectedEndpoint = 'https://api-3t.sandbox.paypal.com/nvp';
+		$mockResponse = 'REFUNDTRANSACTIONID=7A85962474587184P&FEEREFUNDAMT=0%2e34&GROSSREFUNDAMT=10%2e00&NETREFUNDAMT=9%2e66&CURRENCYCODE=GBP&TOTALREFUNDEDAMOUNT=10%2e00&TIMESTAMP=2014%2d02%2d17T16%3a20%3a54Z&CORRELATIONID=dec2e2442c751&ACK=Success&VERSION=104%2e0&BUILD=9720069&REFUNDSTATUS=Instant&PENDINGREASON=None';
+		$this->Paypal->HttpSocket = $this->getMock('HttpSocket');
+		$this->Paypal->HttpSocket->expects($this->once())
+			->method('post')
+			->with($this->equalTo($expectedEndpoint) , $this->equalTo($expectedNvps))
+			->will($this->returnValue($mockResponse));
+
+		$result = $this->Paypal->refundTransaction($refund);
+		$expectedParsedResponse = array(
+			'REFUNDTRANSACTIONID' => '7A85962474587184P',
+			'FEEREFUNDAMT' => '0.34',
+			'GROSSREFUNDAMT' => '10.00',
+			'NETREFUNDAMT' => '9.66',
+			'CURRENCYCODE' => 'GBP',
+			'TOTALREFUNDEDAMOUNT' => '10.00',
+			'TIMESTAMP' => '2014-02-17T16:20:54Z',
+			'CORRELATIONID' => 'dec2e2442c751',
+			'ACK' => 'Success',
+			'VERSION' => '104.0',
+			'BUILD' => '9720069',
+			'REFUNDSTATUS' => 'Instant',
+			'PENDINGREASON' => 'None'
+		);
+		$this->assertEqual($expectedParsedResponse, $result);
+	}
 
 }
