@@ -143,7 +143,7 @@ $payment = array(
 		'Y' => '2016',
 	),
 	'cvv' => '321',
-	'currency => 'USD' // Defaults to GBP if not provided
+	'currency' => 'USD' // Defaults to GBP if not provided
 );
 
 $this->Paypal->doDirectPayment($payment);
