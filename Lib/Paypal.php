@@ -89,6 +89,11 @@ class Paypal {
 	protected $oAuthAccessToken = null;
 
 /**
+ * API credentials - oAuth token type
+ */
+	protected $oAuthTokenType = null;
+
+/**
  * Live endpoint for REST API
  */
 	protected $liveRestEndpoint = 'https://api.paypal.com';
@@ -499,6 +504,80 @@ class Paypal {
 	}
 
 /**
+ * The StoreCreditCard API Operation enables you to save a customer credit card with Paypal
+ *
+ * @param array $refund original transaction information and amount to refund
+ * @return array store card response
+ * @author Israel Sotomayor Azcuna
+ **/
+	public function storeCreditCard($creditCard) {
+		try {
+			$nvps = $this->buildCreditCardDetailsNvp($creditCard);
+				
+			// OAuth2
+			$response = $this->getOAuthAccessToken();
+			$this->oAuthAccessToken = $response['access_token'];
+			$this->oAuthTokenType = $response['token_type'];
+				
+			// HttpSocket
+			if (!$this->HttpSocket) {
+				$this->HttpSocket = new HttpSocket();
+			}
+			$this->HttpSocket->configAuth('Paypal.OAuth', array('access_token' => $this->oAuthAccessToken, 'token_type' => $this->oAuthTokenType));
+				
+			// Rest API oAuth2 endpoint
+			$endPoint = $this->storeCreditCardUrl();
+				
+			// Make a Http request for a new token
+			$response = $this->HttpSocket->post($endPoint, json_encode($nvps));
+	
+			// Parse the results
+			$parsed = $this->parseRestApiResponse($response);
+	
+			// Handle the resposne
+			if (isset($parsed['state']) && $parsed['state'] == "ok") {
+				return $parsed;
+			} else {
+				throw new PaypalException(__d('paypal' , 'There was an error storing the credit card'));
+			}
+				
+		} catch (SocketException $e) {
+			throw new PaypalException(__d('paypal', 'A problem occurred during the store credit card process, please try again.'));
+		}
+	}
+
+/**
+ * Get the Authentication credentials to comunicate with Paypal using OAuth2
+ *
+ * @throws PaypalException
+ * @return array authentication response
+ * @author Israel Sotomayor
+ **/
+	public function getOAuthAccessToken() {
+		// HttpSocket
+		if (!$this->HttpSocket) {
+			$this->HttpSocket = new HttpSocket();
+		}
+		$this->HttpSocket->configAuth('Basic', $this->oAuthClientId, $this->oAuthSecret);
+	
+		// Rest API oAuth2 endpoint
+		$endPoint = $this->oAuthTokenUrl();
+	
+		// Make a Http request for a new token
+		$response = $this->HttpSocket->post($endPoint , array("grant_type" => "client_credentials"));
+	
+		// Parse the results
+		$parsed = $this->parseRestApiResponse($response);
+	
+		// Handle the resposne
+		if (isset($response->code) && $response->code == 200) {
+			return $parsed;
+		} elseÊ{
+			throw new PaypalException(__d('paypal' , 'There was an error getting the oAuth credentials'));
+		}
+	}
+	
+/**
  * Takes a payment array and formats in to the minimum NVPs to complete a payment
  *
  * @param array Credit card/amount information (see tests)
@@ -691,6 +770,48 @@ class Paypal {
 	}
 
 /**
+ * Formats the credit card array to Paypal nvps
+ *
+ * @param array $creditCard Takes an array credit card.
+ * @return array Formatted array of Paypal NVPs for storeCreditCard
+ * @author Israel Sotomayor
+ **/
+	public function buildCreditCardDetailsNvp($creditCard) {
+		if (empty($creditCard) || !is_array($creditCard)) {
+			throw new PaypalException(__d('paypal' , 'You must pass a valid credit card array'));
+		}
+
+		if (!isset($creditCard['type'])) {
+			throw new PaypalException(__d('paypal' , 'Valid credit card type must be provided'));
+		}
+
+		if (!isset($creditCard['expireMonth']) || !isset($creditCard['expireYear'])) {
+			throw new PaypalException(__d('paypal' , 'Valid expire month/year card type must be provided'));
+		}
+
+		// Set payer id
+		$payerId = (isset($creditCard['payerId'])) ? $creditCard['payerId'] : '';
+		// Set cvv
+		$cvv2 = (isset($creditCard['cvv2'])) ? $creditCard['cvv2'] : '';
+		// Set first name
+		$firstName = (isset($creditCard['firstName'])) ? $creditCard['firstName'] : '';
+		// Set last name
+		$lastName = (isset($creditCard['lastName'])) ? $creditCard['lastName'] : '';
+
+		$nvps = array(
+			'number' => $creditCard['number'],
+			'type' => $creditCard['type'],
+			'expire_month' => $creditCard['expireMonth'],
+			'expire_year' => $creditCard['expireYear'],
+			'payer_id' => $payerId,
+			'cvv2' => $creditCard['cvv2'],
+			'first_name' => $creditCard['firstName'],
+			'last_name' => $creditCard['lastName']
+		);
+		return $nvps;
+	}
+
+/**
  * Returns the Paypal REST API endpoint
  *
  * @return string
@@ -719,8 +840,8 @@ class Paypal {
 /**
  * Returns Paypal Adaptive Accounts API endpoint
  *
- * @author Chris Green
  * @return string
+ * @author Chris Green
  **/
 	public function getAdaptiveAccountsEndpoint() {
 		if ($this->sandboxMode) {
@@ -728,7 +849,6 @@ class Paypal {
 		}
 		return $this->liveAdaptiveAccountsEndpoint;
 	}
-
 
 /**
  * Returns the Paypal login URL for express checkout
@@ -744,6 +864,26 @@ class Paypal {
 	}
 
 /**
+ * Build the oAuth url to get the token
+ *
+ * @return string
+ * @author Israel Sotomayor
+ */
+	public function oAuthTokenUrl() {
+		return $this->getRestEndpoint().'/v1/oauth2/token';
+	}
+
+/**
+ * Build the credit card url to store the credit card
+ *
+ * @return string
+ * @author Israel Sotomayor
+ */
+	public function storeCreditCardUrl() {
+		return $this->getRestEndpoint().'/v1/vault/credit-card';
+	}
+
+/**
  * Build the login url for an express checkout payment, user is redirected to this
  *
  * @param string $token
@@ -753,6 +893,17 @@ class Paypal {
 	public function expressCheckoutUrl($token) {
 		$endpoint = $this->getPaypalLoginUri();
 		return "$endpoint?cmd=_express-checkout&token=$token";
+	}
+
+/**
+ * Parse the body of the reponse from JSON object into an array
+ *
+ * @param string $response A JSON object from Paypal
+ * @return array Nicely parsed response array
+ * @author Israel Sotomayor
+ */
+	public function parseRestApiResponse($response) {
+		return json_decode($response->body(), true);
 	}
 
 /**
@@ -766,5 +917,4 @@ class Paypal {
 		parse_str($response , $parsed);
 		return $parsed;
 	}
-
 }
