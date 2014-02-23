@@ -54,7 +54,9 @@ $this->Paypal = new Paypal(array(
 	'sandboxMode' => true,
 	'nvpUsername' => '{username}',
 	'nvpPassword' => '{password}',
-	'nvpSignature' => '{signature}'
+	'nvpSignature' => '{signature}',
+	'oAuthClientId' => '{client_id'}, // RestFul API credentials
+	'oAuthSecret' => {'secret'})); // RestFul API credentials
 ));
 ```
 
@@ -157,11 +159,30 @@ Refund a transction. Transactions can only be refunded up to 60 days after the c
 $refund = array(
 	'transactionId' => '96L684679W100181R' // Original PayPal Transcation ID
 	'type' => 'Partial', // Full, Partial, ExternalDispute, Other
-	'amount' => 30.00, // Amount to refund, only required if Refund Type is Partial
+	'amount' => 30.00, // Amount to refund, only required if Refund Type is Partial, ExternalDispute, Other
 	'note' => 'Refund because we are nice',  // Optional note to customer
 	'reference' => 'abc123',  // Optional internal reference
 	'currency' => 'USD'  // Defaults to GBP if not provided
 );
 
 $this->Paypal->refundTransaction($refund);
+```
+
+## StoreCreditCard
+
+Store customer credit card, using the new RestFull API.
+
+```php
+$creditCard = array(
+	'number' => '8762187612312' // Credit card number. Numeric characters only with no spaces or punctuation.
+	'type' => 'Visa' // Credit card type. Valid types are: visa, mastercard, discover, amex
+	'expireMonth' => '02',
+	'expireYear' => '2016'
+	'payerId' => '123', // A unique identifier that you can assign and track when storing a credit card or using a stored credit card.
+	'cvv2' => '312',
+	'firstName' => 'firstName',
+	'lastName' => 'lastName'
+);
+
+$this->Paypal->storeCreditCard($creditCard);
 ```
