@@ -9,7 +9,7 @@ php:
 before_script:
   - mysql -e 'CREATE DATABASE cakephp_test;'
   - echo -e "Host github.com\n\tStrictHostKeyChecking no\n" >> ~/.ssh/config
-  - git clone git@github.com:cakephp/cakephp.git
+  - git quick-clone git@github.com:cakephp/cakephp.git
   - mkdir cakephp/app/Plugin/Paypal
   - cp -r Lib cakephp/app/Plugin/Paypal/ 
   - cp -r Test cakephp/app/Plugin/Paypal/
