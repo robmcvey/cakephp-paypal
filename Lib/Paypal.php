@@ -731,11 +731,6 @@ class Paypal {
 			throw new PaypalException(__d('paypal' , 'Original PayPal Transaction ID is required'));
 		}
 		$refund['transactionId'] = preg_replace("/\s/" , "" , $refund['transactionId']);
-		// Amount to refund
-		if (!isset($refund['amount'])) {
-			throw new PaypalException(__d('paypal' , 'Must specify an "amount" to refund'));
-		}
-
 		// Type of refund
 		if (!isset($refund['type'])) {
 			throw new PaypalException(__d('paypal' , 'You must specify a refund type, such as Full or Partial'));
