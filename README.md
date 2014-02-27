@@ -1,6 +1,6 @@
 # Paypal Plugin for CakePHP 2.x
 
-![https://travis-ci.org/robmcvey/cakephp-paypal](https://api.travis-ci.org/robmcvey/cakephp-paypal.png)
+[![Build Status](https://secure.travis-ci.org/robmcvey/cakephp-paypal.png?branch=master)](https://travis-ci.org/robmcvey/cakephp-paypal)
 
 A CakePHP plugin to interact with Paypal's "classic" and new REST APIs.
 
