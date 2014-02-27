@@ -513,34 +513,34 @@ class Paypal {
 	public function storeCreditCard($creditCard) {
 		try {
 			$nvps = $this->buildCreditCardDetailsNvp($creditCard);
-				
+
 			// OAuth2
 			$response = $this->getOAuthAccessToken();
 			$this->oAuthAccessToken = $response['access_token'];
 			$this->oAuthTokenType = $response['token_type'];
-				
+
 			// HttpSocket
 			if (!$this->HttpSocket) {
 				$this->HttpSocket = new HttpSocket();
 			}
 			$this->HttpSocket->configAuth('Paypal.OAuth', array('access_token' => $this->oAuthAccessToken, 'token_type' => $this->oAuthTokenType));
-				
+
 			// Rest API oAuth2 endpoint
 			$endPoint = $this->storeCreditCardUrl();
-				
+
 			// Make a Http request for a new token
 			$response = $this->HttpSocket->post($endPoint, json_encode($nvps));
-	
+
 			// Parse the results
 			$parsed = $this->parseRestApiResponse($response);
-	
+
 			// Handle the resposne
 			if (isset($parsed['state']) && $parsed['state'] == "ok") {
 				return $parsed;
 			} else {
 				throw new PaypalException(__d('paypal' , 'There was an error storing the credit card'));
 			}
-				
+
 		} catch (SocketException $e) {
 			throw new PaypalException(__d('paypal', 'A problem occurred during the store credit card process, please try again.'));
 		}
@@ -559,24 +559,24 @@ class Paypal {
 			$this->HttpSocket = new HttpSocket();
 		}
 		$this->HttpSocket->configAuth('Basic', $this->oAuthClientId, $this->oAuthSecret);
-	
+
 		// Rest API oAuth2 endpoint
 		$endPoint = $this->oAuthTokenUrl();
-	
+
 		// Make a Http request for a new token
 		$response = $this->HttpSocket->post($endPoint , array("grant_type" => "client_credentials"));
-	
+
 		// Parse the results
 		$parsed = $this->parseRestApiResponse($response);
-	
+
 		// Handle the resposne
 		if (isset($response->code) && $response->code == 200) {
 			return $parsed;
-		} elseÊ{
+		} else {
 			throw new PaypalException(__d('paypal' , 'There was an error getting the oAuth credentials'));
 		}
 	}
-	
+
 /**
  * Takes a payment array and formats in to the minimum NVPs to complete a payment
  *
@@ -735,7 +735,7 @@ class Paypal {
 		if (!isset($refund['amount'])) {
 			throw new PaypalException(__d('paypal' , 'Must specify an "amount" to refund'));
 		}
-		
+
 		// Type of refund
 		if (!isset($refund['type'])) {
 			throw new PaypalException(__d('paypal' , 'You must specify a refund type, such as Full or Partial'));
@@ -763,8 +763,11 @@ class Paypal {
 			'REFUNDSOURCE' => $source,						// any, default, instant, eCheck		
 		);	
 		// Refund amount, only set if REFUNDTYPE is Partial
-		if ($refund['type'] == 'Partial') {
-			$nvps['AMT'] = $refund['amount']; 
+		if ($refund['type'] != 'Full') {
+			if (!isset($refund['amount'])) {
+				throw new PaypalException(__d('paypal' , 'Must specify an "amount" to refund'));
+			}
+			$nvps['AMT'] = $refund['amount'];
 		}
 		return $nvps;
 	}
