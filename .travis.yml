@@ -1,41 +1,41 @@
 language: php
 
 php:
-    - 5.2
-    - 5.3
-    - 5.4
-    - 5.5
+  - 5.2
+  - 5.3
+  - 5.4
+  - 5.5
 
 before_script:
-    - mysql -e 'CREATE DATABASE cakephp_test;'
-    - git clone git@github.com:cakephp/cakephp.git
-    - mkdir cakephp/app/Plugin/Paypal
-    - cp -r Lib cakephp/app/Plugin/Paypal/ 
-    - cp -r Test cakephp/app/Plugin/Paypal/
-    - cd cakephp
-    - chmod -R 777 ./app/tmp
-    - echo "CakePlugin::loadAll();" >> ./app/Config/bootstrap.php
-    - echo "<?php
+  - mysql -e 'CREATE DATABASE cakephp_test;'
+  - git clone git@github.com:cakephp/cakephp.git
+  - mkdir cakephp/app/Plugin/Paypal
+  - cp -r Lib cakephp/app/Plugin/Paypal/ 
+  - cp -r Test cakephp/app/Plugin/Paypal/
+  - cd cakephp
+  - chmod -R 777 ./app/tmp
+  - echo "CakePlugin::loadAll();" >> ./app/Config/bootstrap.php
+  - echo "<?php
     class DATABASE_CONFIG {
-        public \$default = array(
-            'datasource' => 'Database/Mysql',
-            'persistent' => false,
-            'host' => '0.0.0.0',
-            'login' => 'travis',
-            'password' => '',
-            'database' => 'cakephp_test',
-            'prefix' => ''
-        );
-        public \$test = array(
-            'datasource' => 'Database/Mysql',
-            'persistent' => false,
-            'host' => '0.0.0.0',
-            'login' => 'travis',
-            'password' => '',
-            'database' => 'cakephp_test',
-            'prefix' => ''
-        );
+    public \$default = array(
+    'datasource' => 'Database/Mysql',
+    'persistent' => false,
+    'host' => '0.0.0.0',
+    'login' => 'travis',
+    'password' => '',
+    'database' => 'cakephp_test',
+    'prefix' => ''
+    );
+    public \$test = array(
+    'datasource' => 'Database/Mysql',
+    'persistent' => false,
+    'host' => '0.0.0.0',
+    'login' => 'travis',
+    'password' => '',
+    'database' => 'cakephp_test',
+    'prefix' => ''
+    );
     }" > ./app/Config/database.php
-    
+
 script:
-    - ./app/Console/cake test Paypal Lib/Paypal --stderr
+  - ./app/Console/cake test Paypal Lib/Paypal --stderr
