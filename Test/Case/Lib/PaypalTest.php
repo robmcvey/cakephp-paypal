@@ -106,8 +106,7 @@ class PaypalTestCase extends CakeTestCase {
 			->method('post')
 			->with($this->equalTo($expectedEndpoint) , $this->equalTo($expectedQuery))
 			->will($this->returnValue($mockResponse));
-
-        $result = $this->Paypal->getVerifiedStatus('stuff');
+        $this->Paypal->getVerifiedStatus('stuff');
 
     }
 
@@ -117,7 +116,6 @@ class PaypalTestCase extends CakeTestCase {
  * @author Chris Green
  **/
     public function testGetVerifiedStatus() {
-
 		// Setup Paypal sandbox
 		$this->Paypal = new Paypal(array(
 			'sandboxMode' => true,
@@ -125,17 +123,14 @@ class PaypalTestCase extends CakeTestCase {
 			'nvpPassword' => 'bar',
 			'nvpSignature' => 'foobar'
 		));
-
         // Expected endpoint for POST
         $expectedEndpoint = 'https://svcs.sandbox.paypal.com/AdaptiveAccounts/GetVerifiedStatus';
-
         // Expected query for POST
         $expectedQuery = array(
             'accountIdentifier.emailAddress' => 'robm24_1322925502_per@gmail.com',
             'matchCriteria' => 'NONE',
             'requestEnvelope.errorLanguage' => 'en_GB'
         );
-
         // Expected headers for POST
         $expectedHeaders = array(
             'X-PAYPAL-SANDBOX-EMAIL-ADDRESS' => 'Platform.sdk.seller@gmail.com',
@@ -146,7 +141,6 @@ class PaypalTestCase extends CakeTestCase {
             'X-PAYPAL-RESPONSE-DATA-FORMAT' => 'JSON',
             'X-PAYPAL-SECURITY-USERID' => 'jb-us-seller_api1.paypal.com'
         );
-
         $mockResponse = json_encode(array(
             'responseEnvelope' => array(
                 'timestamp' => '2013-10-23T04:19:07.312-07:00',
@@ -170,7 +164,6 @@ class PaypalTestCase extends CakeTestCase {
                 'businessName' => ''
             )
         ));
-
         // Expected result
         $expected = array(
             'responseEnvelope' => array(
@@ -195,16 +188,13 @@ class PaypalTestCase extends CakeTestCase {
                 'businessName' => ''
             )
         );
-
 		// Mock request
 		$this->Paypal->HttpSocket = $this->getMock('HttpSocket');
 		$this->Paypal->HttpSocket->expects($this->once())
 			->method('post')
 			->with($this->equalTo($expectedEndpoint) , $this->equalTo($expectedQuery))
 			->will($this->returnValue($mockResponse));
-
         $result = $this->Paypal->getVerifiedStatus('robm24_1322925502_per@gmail.com');
-
         $this->assertEqual($result, $expected);
     }
 
@@ -216,7 +206,6 @@ class PaypalTestCase extends CakeTestCase {
  * @expectedExceptionMessage The billing agreement is disabled or inactive.
  */
 	public function testDoExpressCheckoutPaymentException() {
-
 		// Setup Paypal sandbox
 		$this->Paypal = new Paypal(array(
 			'sandboxMode' => true,
@@ -224,7 +213,6 @@ class PaypalTestCase extends CakeTestCase {
 			'nvpPassword' => 'bar',
 			'nvpSignature' => 'foobar'
 		));
-
 		// Create order
 		$order = array(
 			'description' => 'Your purchase with Acme clothes store',
@@ -291,7 +279,7 @@ class PaypalTestCase extends CakeTestCase {
 			->will($this->returnValue($mockResponse));
 
 		// Do the payment
-		$result = $this->Paypal->doExpressCheckoutPayment($order , $token , $payerId);
+		$this->Paypal->doExpressCheckoutPayment($order , $token , $payerId);
 	}
 
 /**
@@ -322,7 +310,6 @@ class PaypalTestCase extends CakeTestCase {
 		$this->Paypal->CakeRequest->expects($this->once())
 			->method('clientIp')
 			->will($this->returnValue("217.114.52.94"));
-
 		// Mock the HttpSocket class
 		$expectedEndpoint = 'https://api-3t.sandbox.paypal.com/nvp';
 		$mockResponse = 'TIMESTAMP=2013%2d07%2d05T13%3a52%3a48Z&CORRELATIONID=5d7677126e0b4&ACK=Success&VERSION=104%2e0&BUILD=6680107&AMT=30%2e00&CURRENCYCODE=GBP&AVSCODE=X&CVV2MATCH=M&TRANSACTIONID=0XW09448VG556664J';
@@ -352,8 +339,7 @@ class PaypalTestCase extends CakeTestCase {
 			->method('post')
 			->with($this->equalTo($expectedEndpoint) , $this->equalTo($expectedNvps))
 			->will($this->throwException(new SocketException('A socket exception')));
-
-		$result = $this->Paypal->doDirectPayment($payment);
+		$this->Paypal->doDirectPayment($payment);
     }
 
 /**
@@ -431,8 +417,7 @@ class PaypalTestCase extends CakeTestCase {
 			->method('post')
 			->with($this->equalTo($expectedEndpoint) , $this->equalTo($expectedNvps))
 			->will($this->throwException(new SocketException('A socket exception')));
-		$result = $this->Paypal->doExpressCheckoutPayment($order , $token , $payerId);
-
+		$this->Paypal->doExpressCheckoutPayment($order , $token , $payerId);
     }
 
 /**
@@ -465,8 +450,7 @@ class PaypalTestCase extends CakeTestCase {
 			->method('post')
 			->with($this->equalTo($expectedEndpoint) , $this->equalTo($expectedNvps))
 			->will($this->throwException(new SocketException('A socket exception')));
-		$result = $this->Paypal->getExpressCheckoutDetails($token);
-
+		$this->Paypal->getExpressCheckoutDetails($token);
     }
 
 /**
@@ -540,8 +524,7 @@ class PaypalTestCase extends CakeTestCase {
 			->method('post')
 			->with($this->equalTo($expectedEndpoint) , $this->equalTo($expectedNvps))
 			->will($this->throwException(new SocketException('A socket exception')));
-		$result = $this->Paypal->setExpressCheckout($order);
-
+		$this->Paypal->setExpressCheckout($order);
     }
 
 /**
