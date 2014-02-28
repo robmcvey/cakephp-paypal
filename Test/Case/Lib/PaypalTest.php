@@ -1693,5 +1693,34 @@ class PaypalTestCase extends CakeTestCase {
 		$result = $this->Paypal->expressCheckoutUrl('token832832');
 		$this->assertEqual('https://www.sandbox.paypal.com/webscr?cmd=_express-checkout&token=token832832', $result);
 	}
+	
+/**
+ * testParseRestApiResponse
+ *
+ * @return void
+ * @author Rob Mcvey
+ **/
+	public function testParseRestApiResponse() {
+		$this->Paypal = new Paypal(array(
+			'sandboxMode' => true,
+			'nvpUsername' => 'foo',
+			'nvpPassword' => 'bar',
+			'nvpSignature' => 'foobar',
+			'oAuthClientId' => 'AcTTqBCP8Upk02nweU4UBcQfhuVqs3Ap',
+			'oAuthSecret' => 'EE_n3xCocXhVo2MhfT6FrRaRxv19aHTyGkjxV'
+		));
+		$expectedHttpResponse = new stdClass();
+		$expectedHttpResponse->body = '{"scope":"https://api.paypal.com/v1/payments/.* https://api.paypal.com/v1/vault/credit-card https://api.paypal.com/v1/vault/credit-card/.* https://api.paypal.com/v1/developer/.*","access_token":"jdtQjkQlctD5.OcAAuVi9HQVjw34ZnxVLvJU","token_type":"Bearer","app_id":"APP-80W25P519543T","expires_in":28800}';
+		$expectedHttpResponse->code = 200;
+		$expected = array(
+			'scope' => 'https://api.paypal.com/v1/payments/.* https://api.paypal.com/v1/vault/credit-card https://api.paypal.com/v1/vault/credit-card/.* https://api.paypal.com/v1/developer/.*',
+			'access_token' => 'jdtQjkQlctD5.OcAAuVi9HQVjw34ZnxVLvJU',
+			'token_type' => 'Bearer',
+			'app_id' => 'APP-80W25P519543T',
+			'expires_in' => 28800
+		);
+		$result = $this->Paypal->parseRestApiResponse($expectedHttpResponse);
+		$this->assertEqual($expected, $result);
+	}
 
 }
