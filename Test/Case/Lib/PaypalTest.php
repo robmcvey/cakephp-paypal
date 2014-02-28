@@ -1722,5 +1722,24 @@ class PaypalTestCase extends CakeTestCase {
 		$result = $this->Paypal->parseRestApiResponse($expectedHttpResponse);
 		$this->assertEqual($expected, $result);
 	}
+	
+/**
+ * testStoreCreditCardUrl
+ *
+ * @return void
+ * @author Rob Mcvey
+ **/
+	public function testStoreCreditCardUrl() {
+		$this->Paypal = new Paypal(array(
+			'sandboxMode' => true,
+			'nvpUsername' => 'foo',
+			'nvpPassword' => 'bar',
+			'nvpSignature' => 'foobar',
+			'oAuthClientId' => 'AcTTqBCP8Upk02nweU4UBcQfhuVqs3Ap',
+			'oAuthSecret' => 'EE_n3xCocXhVo2MhfT6FrRaRxv19aHTyGkjxV'
+		));
+		$result = $this->Paypal->storeCreditCardUrl();
+		$this->assertEqual('https://api.sandbox.paypal.com/v1/vault/credit-card', $result);
+	}
 
 }
