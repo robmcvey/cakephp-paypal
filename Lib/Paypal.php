@@ -889,7 +889,7 @@ class Paypal {
  * @author Israel Sotomayor
  */
 	public function parseRestApiResponse($response) {
-		return json_decode($response->body(), true);
+		return json_decode($response->body, true);
 	}
 
 /**
@@ -900,7 +900,7 @@ class Paypal {
  * @author Rob Mcvey
  **/
 	public function parseClassicApiResponse($response) {
-		parse_str($response , $parsed);
+		parse_str($response, $parsed);
 		return $parsed;
 	}
 }

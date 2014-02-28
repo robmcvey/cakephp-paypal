@@ -1638,5 +1638,41 @@ class PaypalTestCase extends CakeTestCase {
 		$result = $this->Paypal->oAuthTokenUrl();
 		$this->assertEqual('https://api.sandbox.paypal.com/v1/oauth2/token', $result);
 	}
+	
+/**
+ * testGetOAuthAccessToken
+ *
+ * @return void
+ * @author Rob Mcvey
+ **/
+	public function testGetOAuthAccessToken() {
+		$this->Paypal = new Paypal(array(
+			'sandboxMode' => true,
+			'nvpUsername' => 'foo',
+			'nvpPassword' => 'bar',
+			'nvpSignature' => 'foobar',
+			'oAuthClientId' => 'AcTTqBCP8Upk02nweU4UBcQfhuVqs3Ap',
+			'oAuthSecret' => 'EE_n3xCocXhVo2MhfT6FrRaRxv19aHTyGkjxV'
+		));
+		$expectedTokenUrl = 'https://api.sandbox.paypal.com/v1/oauth2/token';
+		$expectedHttpResponse = new stdClass();
+		$expectedHttpResponse->body = '{"scope":"https://api.paypal.com/v1/payments/.* https://api.paypal.com/v1/vault/credit-card https://api.paypal.com/v1/vault/credit-card/.* https://api.paypal.com/v1/developer/.*","access_token":"jdtQjkQlctD5.OcAAuVi9HQVjw34ZnxVLvJU","token_type":"Bearer","app_id":"APP-80W25P519543T","expires_in":28800}';
+		$expectedHttpResponse->code = 200;
+		$expectedResult = array(
+			'scope' => 'https://api.paypal.com/v1/payments/.* https://api.paypal.com/v1/vault/credit-card https://api.paypal.com/v1/vault/credit-card/.* https://api.paypal.com/v1/developer/.*',
+			'access_token' => 'jdtQjkQlctD5.OcAAuVi9HQVjw34ZnxVLvJU',
+			'token_type' => 'Bearer',
+			'app_id' => 'APP-80W25P519543T',
+			'expires_in' => 28800
+		);
+		// Mock the HttpSocket class
+		$this->Paypal->HttpSocket = $this->getMock('HttpSocket');
+		$this->Paypal->HttpSocket->expects($this->once())
+			->method('post')
+			->with($expectedTokenUrl , array("grant_type" => "client_credentials"))
+			->will($this->returnValue($expectedHttpResponse));
+		$result = $this->Paypal->getOAuthAccessToken();
+		$this->assertEqual($expectedResult, $result);
+	}
 
 }
