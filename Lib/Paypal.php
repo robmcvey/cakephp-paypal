@@ -581,24 +581,20 @@ class Paypal {
 		if (empty($ipAddress)) {
 			throw new PaypalException(__d('paypal' , 'Could not detect client IP address'));
 		}
-
 		// Credit card number
 		if (!isset($payment['card'])) {
 			throw new PaypalException(__d('paypal' , 'Not a valid credit card number'));
 		}
 		$payment['card'] = preg_replace("/\s/" , "" , $payment['card']);
-
 		// Credit card number
 		if (!isset($payment['cvv'])) {
 			throw new PaypalException(__d('paypal' , 'You must include the 3 digit security number'));
 		}
 		$payment['cvv'] = preg_replace("/\s/" , "" , $payment['cvv']);
-
 		// Amount
 		if (!isset($payment['amount'])) {
 			throw new PaypalException(__d('paypal' , 'Must specify an "amount" to charge'));
 		}
-
 		// Expiry
 		if (!isset($payment['expiry'])) {
 			throw new PaypalException(__d('paypal' , 'Must specify an expiry date'));
@@ -611,32 +607,30 @@ class Paypal {
 		$month = $payment['expiry']['M'];
 		$year = $payment['expiry']['Y'];
 		$expiry = sprintf('%d%d' , $month, $year);
-
 		$currency = 'GBP';
 		if(isset($payment['currency'])){
 			$currency = strtoupper($payment['currency']);
 		}
-
 		$nvps = array(
 			'METHOD' => 'DoDirectPayment',
 			'VERSION' => $this->paypalClassicApiVersion,
 			'USER' => $this->nvpUsername,
 			'PWD' => $this->nvpPassword,
 			'SIGNATURE' => $this->nvpSignature,
-			'IPADDRESS' => $ipAddress, 		// Required
+			'IPADDRESS' => $ipAddress, 			// Required
 			'AMT' => $payment['amount'], 		// The total cost of the transaction
 			'CURRENCYCODE' => $currency,		// A 3-character currency code
-			'RECURRING' => 'N',			// Recurring flag
-			'ACCT' => $payment['card'],		// Numeric characters only with no spaces
-			'EXPDATE' => $expiry,			// MMYYYY
-			'CVV2' => $payment['cvv'],		// xxx
-			'FIRSTNAME' => '',			// Required
-			'LASTNAME' => '', 			// Required
-			'STREET' => '', 			// Required
-			'CITY' => '', 				// Required
-			'STATE' => '', 				// Required
-			'COUNTRYCODE' => '',			// Required 2 single-byte characters
-			'ZIP' => '', 				// Required
+			'RECURRING' => 'N',					// Recurring flag
+			'ACCT' => $payment['card'],			// Numeric characters only with no spaces
+			'EXPDATE' => $expiry,				// MMYYYY
+			'CVV2' => $payment['cvv'],			// xxx
+			'FIRSTNAME' => '',					// Required
+			'LASTNAME' => '', 					// Required
+			'STREET' => '', 					// Required
+			'CITY' => '', 						// Required
+			'STATE' => '', 						// Required
+			'COUNTRYCODE' => '',				// Required 2 single-byte characters
+			'ZIP' => '', 						// Required
 		);
 		return $nvps;
 	}
@@ -670,17 +664,14 @@ class Paypal {
 			'PAYMENTREQUEST_0_CURRENCYCODE' => $order['currency'],
 			'PAYMENTREQUEST_0_DESC' => $order['description'],
 		);
-
 		// Custom field?
 		if (isset($order['custom'])) {
 			$nvps['PAYMENTREQUEST_0_CUSTOM'] = $order['custom'];
 		}
-
 		// Notify URL?
 		if (isset($order['notifyUrl'])) {
 			$nvps['PAYMENTREQUEST_0_NOTIFYURL'] = $order['notifyUrl'];
 		}
-
 		// Add up each item and calculate totals
 		if (isset($order['items']) && is_array($order['items'])) {
 			$items_subtotal = array_sum(Hash::extract($order , 'items.{n}.subtotal'));
@@ -766,15 +757,12 @@ class Paypal {
 		if (empty($creditCard) || !is_array($creditCard)) {
 			throw new PaypalException(__d('paypal' , 'You must pass a valid credit card array'));
 		}
-
 		if (!isset($creditCard['type'])) {
 			throw new PaypalException(__d('paypal' , 'Valid credit card type must be provided'));
 		}
-
 		if (!isset($creditCard['expireMonth']) || !isset($creditCard['expireYear'])) {
 			throw new PaypalException(__d('paypal' , 'Valid expire month/year card type must be provided'));
 		}
-
 		// Set payer id
 		$payerId = (isset($creditCard['payerId'])) ? $creditCard['payerId'] : '';
 		// Set cvv
@@ -783,7 +771,6 @@ class Paypal {
 		$firstName = (isset($creditCard['firstName'])) ? $creditCard['firstName'] : '';
 		// Set last name
 		$lastName = (isset($creditCard['lastName'])) ? $creditCard['lastName'] : '';
-
 		$nvps = array(
 			'number' => $creditCard['number'],
 			'type' => $creditCard['type'],
@@ -903,4 +890,5 @@ class Paypal {
 		parse_str($response, $parsed);
 		return $parsed;
 	}
+	
 }
