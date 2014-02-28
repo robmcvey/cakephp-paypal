@@ -1619,5 +1619,24 @@ class PaypalTestCase extends CakeTestCase {
 		);
 		$this->assertEqual($expectedParsedResponse, $result);
 	}
+	
+/**
+ * testOAuthTokenUrl
+ *
+ * @return void
+ * @author Rob Mcvey
+ **/
+	public function testOAuthTokenUrl() {
+		$this->Paypal = new Paypal(array(
+			'sandboxMode' => true,
+			'nvpUsername' => 'foo',
+			'nvpPassword' => 'bar',
+			'nvpSignature' => 'foobar',
+			'oAuthClientId' => 'AcTTqBCP8Upk02nweU4UBcQfhuVqs3Ap',
+			'oAuthSecret' => 'EE_n3xCocXhVo2MhfT6FrRaRxv19aHTyGkjxV'
+		));
+		$result = $this->Paypal->oAuthTokenUrl();
+		$this->assertEqual('https://api.sandbox.paypal.com/v1/oauth2/token', $result);
+	}
 
 }
