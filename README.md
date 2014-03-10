@@ -6,6 +6,7 @@ A CakePHP plugin to interact with Paypal's "classic" and new REST APIs.
 
 ### Requirements
 
+* PHP 5.4
 * CakePHP 2.x
 * A PayPal Website Payments Pro account
 
