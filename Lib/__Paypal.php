@@ -9,11 +9,8 @@
  * @link www.copify.com
  * @license MIT License (http://www.opensource.org/licenses/mit-license.php)
  */
-App::uses('HttpSocket', 'Network/Http');
 App::uses('CakeRequest', 'Network');
-App::uses('PaypalError', 'Paypal.Lib');
-App::uses('PaypalClassic', 'Paypal.Lib');
-App::uses('PaypalREST', 'Paypal.Lib');
+App::uses('HttpSocket', 'Network/Http');
 
 /**
  * Paypal Exception class
@@ -32,7 +29,130 @@ class PaypalRedirectException extends CakeException {
  */
 class Paypal {
 
-	use PaypalClassic, PaypalREST, PaypalError;
+/**
+ * Target version for "Classic" Paypal API
+ */
+	protected $_paypalClassicApiVersion = '104.0';
+
+/**
+ * Live or sandbox
+ */
+	protected $_sandboxMode = true;
+
+/**
+ * API credentials - nvp username
+ */
+	protected $_nvpUsername = null;
+
+/**
+ * API credentials - nvp password
+ */
+	protected $_nvpPassword = null;
+
+/**
+ * API credentials - nvp signature
+ */
+	protected $_nvpSignature = null;
+
+/**
+ * API credentials - nvp token
+ */
+	protected $_nvpToken = null;
+
+/**
+ * API credentials - Adaptive App ID
+ */
+	protected $_adaptiveAppID = null;
+
+/**
+ * API credentials - Adaptive User ID
+ */
+	protected $_adaptiveUserID = null;
+
+/**
+ * API credentials - Application id
+ */
+	protected $_oAuthAppId = null;
+
+/**
+ * API credentials - oAuth client id
+ */
+	protected $_oAuthClientId = null;
+
+/**
+ * API credentials - oAuth secret
+ */
+	protected $_oAuthSecret = null;
+
+/**
+ * API credentials - oAuth access token
+ */
+	protected $_oAuthAccessToken = null;
+
+/**
+ * API credentials - oAuth token type
+ */
+	protected $_oAuthTokenType = null;
+
+/**
+ * Live endpoint for REST API
+ */
+	protected $_liveRestEndpoint = 'https://api.paypal.com';
+
+/**
+ * Sandbox endpoint for REST API
+ */
+	protected $_sandboxRestEndpoint = 'https://api.sandbox.paypal.com';
+
+/**
+ * Live endpoint for Classic API
+ */
+	protected $_liveClassicEndpoint = 'https://api-3t.paypal.com/nvp';
+
+/**
+ * Sandbox endpoint for Classic API
+ */
+	protected $_sandboxClassicEndpoint = 'https://api-3t.sandbox.paypal.com/nvp';
+
+/**
+ * Live endpoint for Adaptive Accounts API
+ */
+	protected $_liveAdaptiveAccountsEndpoint = 'https://svcs.paypal.com/AdaptiveAccounts/';
+
+/**
+ * Sandbox endpoint for Adaptive Accounts API
+ */
+	protected $_sandboxAdaptiveAccountsEndpoint = 'https://svcs.sandbox.paypal.com/AdaptiveAccounts/';
+
+/**
+ * Live endpoint for Paypal web login (used in classic paypal payments)
+ */
+	protected $_livePaypalLoginUri = 'https://www.paypal.com/webscr';
+
+/**
+ * Sandbox endpoint for Paypal web login (used in classic paypal payments)
+ */
+	protected $_sandboxPaypalLoginUri = 'https://www.sandbox.paypal.com/webscr';
+
+/**
+ * More descriptive API error messages. Error code and message.
+ *
+ * @var array
+ */
+	protected $_errorMessages = array ();
+
+/**
+ * Redirect error codes
+ *
+ * @var array
+ */
+	protected $_redirectErrors = array (
+		10411,
+		10412,
+		10422,
+		10445,
+		10486
+	);
 
 /**
  * HttpSocket utility class
@@ -60,6 +180,58 @@ class Paypal {
 				}
 			}
 		}
+
+		$this->_errorMessages = array (
+			10411 => __('The Express Checkout transaction has expired and the transaction needs to be restarted' ),
+			10412 => __('You may have made a second call for the same payment or you may have used the same invoice ID for seperate transactions.' ),
+			10422 => __('Please use a different funcing source.' ),
+			10445 => __('An error occured, please retry the transaction.' ),
+			10486 => __('This transaction couldn\'t be completed. Redirecting to payment gateway' ),
+			10500 => __('You have not agreed to the billing agreement.' ),
+			10501 => __('The billing agreement is disabled or inactive.' ),
+			10502 => __('The credit card used is expired.' ),
+			10505 => __('The transaction was refused because the AVS response returned the value of N, and the merchant account is not able to accept such transactions.' ),
+			10507 => __('The payment gateway account is restricted.' ),
+			10509 => __('You must submit an IP address of the buyer with each API call.' ),
+			10511 => __('The merchant selected a value for the PaymentAction field that is not supported.' ),
+			10519 => __('The credit card field was blank.' ),
+			10520 => __('The total amount and item amounts do not match.' ),
+			10534 => __('The credit card entered is currently restricted by the payment gateway.' ),
+			10536 => __('The merchant entered an invoice ID that is already associated with a transaction by the same merchant. Attempt with a new invoice ID' ),
+			10537 => __('The transaction was declined by the country filter managed by the merchant.' ),
+			10538 => __('The transaction was declined by the maximum amount filter managed by the merchant.' ),
+			10539 => __('The transaction was declined by the payment gateway.' ),
+			10541 => __('The credit card entered is currently restricted by the payment gateway.' ),
+			10544 => __('The transaction was declined by the payment gateway.' ),
+			10545 => __('The transaction was declined by payment gateway because of possible fraudulent activity.' ),
+			10546 => __('The transaction was declined by payment gateway because of possible fraudulent activity on the IP address.' ),
+			10548 => __('The merchant account attempting the transaction is not a business account.' ),
+			10549 => __('The merchant account attempting the transaction is not able to process Direct Payment transactions. ' ),
+			10550 => __('Access to Direct Payment was disabled for your account.' ),
+			10552 => __('The merchant account attempting the transaction does not have a confirmed email address with the payment gateway.' ),
+			10553 => __('The merchant attempted a transaction where the amount exceeded the upper limit for that merchant.' ),
+			10554 => __('The transaction was declined because of a merchant risk filter for AVS. Specifically, the merchant has set to decline transaction when the AVS returned a no match (AVS = N).' ),
+			10555 => __('The transaction was declined because of a merchant risk filter for AVS. Specifically, the merchant has set the filter to decline transactions when the AVS returns a partial match.' ),
+			10556 => __('The transaction was declined because of a merchant risk filter for AVS. Specifically, the merchant has set the filter to decline transactions when the AVS is unsupported.' ),
+			10747 => __('The merchant entered an IP address that was in an invalid format. The IP address must be in a format such as 123.456.123.456.' ),
+			10748 => __('The merchant\'s configuration requires a CVV to be entered, but no CVV was provided with this transaction.' ),
+			10751 => __('The merchant provided an address either in the United States or Canada, but the state provided is not a valid state in either country.' ),
+			10752 => __('The transaction was declined by the issuing bank, not the payment gateway. The merchant should attempt another card.' ),
+			10754 => __('The transaction was declined by the payment gateway.' ),
+			10760 => __('The merchant\'s country of residence is not currently supported to allow Direct Payment transactions.' ),
+			10761 => __('The transaction was declined because the payment gateway is currently processing a transaction by the same buyer for the same amount. Can occur when a buyer submits multiple, identical transactions in quick succession.' ),
+			10762 => __('The CVV provided is invalid. The CVV is between 3-4 digits long.' ),
+			10764 => __('Please try again later. Ensure you have passed the correct CVV and address info for the buyer. If creating a recurring profile, please try again by passing a init amount of 0.' ),
+			12000 => __('Transaction is not compliant due to missing or invalid 3-D Secure authentication values. Check ECI, ECI3DS, CAVV, XID fields.' ),
+			12001 => __('Transaction is not compliant due to missing or invalid 3-D Secure authentication values. Check ECI, ECI3DS, CAVV, XID fields.' ),
+			15001 => __('The transaction was rejected by the payment gateway because of excessive failures over a short period of time for this credit card.' ),
+			15002 => __('The transaction was declined by payment gateway.' ),
+			15003 => __('The transaction was declined because the merchant does not have a valid commercial entity agreement on file with the payment gateway.' ),
+			15004 => __('The transaction was declined because the CVV entered does not match the credit card.' ),
+			15005 => __('The transaction was declined by the issuing bank, not the payment gateway. The merchant should attempt another card.' ),
+			15006 => __('The transaction was declined by the issuing bank, not the payment gateway. The merchant should attempt another card.' ),
+			15007 => __('The transaction was declined by the issuing bank because of an expired credit card. The merchant should attempt another card.' )
+		);
 	}
 
 /**
@@ -117,8 +289,8 @@ class Paypal {
  * @author Chris Green
  */
 	public function getErrorMessage($parsed) {
-		if ($msg = $this->codeToLongMessage($parsed['L_ERRORCODE0'])) {
-			return $msg;
+		if (array_key_exists($parsed['L_ERRORCODE0'], $this->_errorMessages)) {
+			return $this->_errorMessages[$parsed['L_ERRORCODE0']];
 		}
 		return $parsed['L_LONGMESSAGE0'];
 	}

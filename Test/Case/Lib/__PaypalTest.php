@@ -40,24 +40,6 @@ class PaypalTestCase extends CakeTestCase {
 		parent::tearDown();
 		unset($this->Paypal);
 	}
-	
-	/**
-	 * undocumented function
-	 *
-	 * @return void
-	 * @author Rob Mcvey
-	 **/
-	public function testgetPaypalClassicVersion() {
-		// Setup Paypal sandbox
-		$this->Paypal = new Paypal(array(
-			'sandboxMode' => true,
-			'nvpUsername' => 'foo',
-			'nvpPassword' => 'bar',
-			'nvpSignature' => 'foobar'
-		));
-		$v = $this->Paypal->getPaypalClassicVersion();
-		$this->assertEqual($v, '104.0');
-	}
 
 /**
  * Tests that getVerifiedStatus throws an exception when there is an error is the response.
@@ -626,6 +608,7 @@ class PaypalTestCase extends CakeTestCase {
 			->method('post')
 			->with($this->equalTo($expectedEndpoint) , $this->equalTo($expectedNvps))
 			->will($this->returnValue($mockResponse));
+
 		// Do the payment
 		$result = $this->Paypal->doExpressCheckoutPayment($order , $token , $payerId);
 	}
