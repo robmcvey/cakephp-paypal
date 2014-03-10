@@ -9,7 +9,7 @@
 trait PaypalError {
 	
 /**
- * __construct
+ * getLocalizedErrorMessages
  *
  * @return void
  * @author Rob Mcvey
