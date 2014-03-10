@@ -13,19 +13,19 @@ App::uses('CakeRequest', 'Network');
 App::uses('HttpSocket', 'Network/Http');
 
 /**
- * Paypal Exception classes
- */
+ * Paypal Exception class
+ */ 
 class PaypalException extends CakeException {
 }
 
 /**
- * PaypaliRedirect Exception classes
+ * PaypalRedirect Exception class
  */
 class PaypalRedirectException extends CakeException {
 }
 
 /**
- * Paypal class
+ * Paypal
  */
 class Paypal {
 

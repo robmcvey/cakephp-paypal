@@ -12,7 +12,6 @@ class OAuthAuthentication {
  * @param HttpSocket $http
  * @param array $authInfo
  * @return void 
- * 
  * @author Israel Sotomayor
  */
 	public static function authentication(HttpSocket $http, &$authInfo) {
