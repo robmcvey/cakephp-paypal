@@ -1625,7 +1625,7 @@ class PaypalTestCase extends CakeTestCase {
  *
  * @return void
  * @author Rob Mcvey
- **/
+
 	public function testOAuthTokenUrl() {
 		$this->Paypal = new Paypal(array(
 			'sandboxMode' => true,
@@ -1638,13 +1638,14 @@ class PaypalTestCase extends CakeTestCase {
 		$result = $this->Paypal->oAuthTokenUrl();
 		$this->assertEqual('https://api.sandbox.paypal.com/v1/oauth2/token', $result);
 	}
+ **/	
 	
 /**
  * testGetOAuthAccessToken
  *
  * @return void
  * @author Rob Mcvey
- **/
+
 	public function testGetOAuthAccessToken() {
 		$this->Paypal = new Paypal(array(
 			'sandboxMode' => true,
@@ -1674,6 +1675,7 @@ class PaypalTestCase extends CakeTestCase {
 		$result = $this->Paypal->getOAuthAccessToken();
 		$this->assertEqual($expectedResult, $result);
 	}
+ **/	
 	
 /**
  * testExpressCheckoutUrl
@@ -1699,7 +1701,7 @@ class PaypalTestCase extends CakeTestCase {
  *
  * @return void
  * @author Rob Mcvey
- **/
+
 	public function testParseRestApiResponse() {
 		$this->Paypal = new Paypal(array(
 			'sandboxMode' => true,
@@ -1722,13 +1724,14 @@ class PaypalTestCase extends CakeTestCase {
 		$result = $this->Paypal->parseRestApiResponse($expectedHttpResponse);
 		$this->assertEqual($expected, $result);
 	}
+ **/
 	
 /**
  * testStoreCreditCardUrl
  *
  * @return void
  * @author Rob Mcvey
- **/
+
 	public function testStoreCreditCardUrl() {
 		$this->Paypal = new Paypal(array(
 			'sandboxMode' => true,
@@ -1741,13 +1744,14 @@ class PaypalTestCase extends CakeTestCase {
 		$result = $this->Paypal->storeCreditCardUrl();
 		$this->assertEqual('https://api.sandbox.paypal.com/v1/vault/credit-card', $result);
 	}
+ **/	
 	
 /**
  * testBuildCreditCardDetailsNvp
  *
  * @return void
  * @author Rob Mcvey
- **/
+
 	public function testBuildCreditCardDetailsNvp() {
 		$this->Paypal = new Paypal(array(
 			'sandboxMode' => true,
@@ -1770,5 +1774,6 @@ class PaypalTestCase extends CakeTestCase {
 		$result = $this->Paypal->buildCreditCardDetailsNvp($creditCard);
 		$this->assertEqual('?', $result);
 	}
+ **/	
 
 }
