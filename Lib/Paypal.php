@@ -11,6 +11,7 @@
  * @license       MIT License (http://www.opensource.org/licenses/mit-license.php)
  */
 App::uses('CakeRequest', 'Network');
+App::uses('Validation', 'Utility');
 App::uses('HttpSocket', 'Network/Http');
 
 /**
@@ -430,23 +431,19 @@ class Paypal {
  * @author Rob Mcvey
  **/
 	public function doDirectPayment($payment) {
-
         try {
+			// Build NVPs
             $nvps = $this->formatDoDirectPaymentNvps($payment);
-
             // HttpSocket
             if (!$this->HttpSocket) {
                 $this->HttpSocket = new HttpSocket();
             }
             // Classic API endpoint
             $endPoint = $this->getClassicEndpoint();
-
             // Make a Http request for a new token
             $response = $this->HttpSocket->post($endPoint , $nvps);
-
             // Parse the results
             $parsed = $this->parseClassicApiResponse($response);
-
             // Handle the resposne
             if (isset($parsed['ACK']) && $parsed['ACK'] == "Success")  {
                 return $parsed;
@@ -461,7 +458,7 @@ class Paypal {
             throw new PaypalException(__d('paypal', 'There was a problem processing your card, please try again.'));
         }
 	}
-
+	
 /**
  * RefundTransaction
  * The RefundTransaction API Operation enables you to refund a transaction that is less than 60 days old.
@@ -469,9 +466,10 @@ class Paypal {
  * @param array $refund original transaction information and amount to refund
  * @return void
  * @author James Mikkelson
- **/
+**/
 	public function refundTransaction($refund) {
         try {
+			// Build NVPs
 			$nvps = $this->formatRefundTransactionNvps($refund);
 			// HttpSocket
 			if (!$this->HttpSocket) {
@@ -484,10 +482,10 @@ class Paypal {
 			// Parse the results
 			$parsed = $this->parseClassicApiResponse($response);
 			// Handle the resposne
-			if (isset($parsed['ACK']) && $parsed['ACK'] == "Success")  {
+			if (isset($parsed['ACK']) && $parsed['ACK'] == "Success") {
 				return $parsed;
 			}
-			elseif ($parsed['ACK'] == "Failure" && isset($parsed['L_LONGMESSAGE0']))  {
+			elseif ($parsed['ACK'] == "Failure" && isset($parsed['L_LONGMESSAGE0'])) {
 				throw new PaypalException($this->getErrorMessage($parsed));
 			}
 			else {
@@ -497,7 +495,209 @@ class Paypal {
 			throw new PaypalException(__d('paypal', 'A problem occurred during the refund process, please try again.'));
 		}
 	}
-
+	
+/**
+ * Store and use a customer credit card
+ *
+ * @return void
+ * @author Rob Mcvey
+ * @link https://developer.paypal.com/docs/integration/direct/store-a-credit-card/#store-a-credit-card
+ **/
+	public function storeCreditCard($creditCard) {
+		// HttpSocket
+		if (!$this->HttpSocket) {
+			$this->HttpSocket = new HttpSocket();
+		}
+		// Get access token
+		$token = $this->getOAuthAccessToken();
+		$authHeader = sprintf('%s %s', $token['token_type'], $token['access_token']);
+		// Reset the HttpSocket as it's already been setup (with headers) by getOAuthAccessToken
+		$this->HttpSocket->reset();
+		// Get store card endpoint
+		$endPoint = $this->storeCreditCardUrl();
+		// JSON encode our card array
+		$json = json_encode($this->formatStoreCreditCardArgs($creditCard));
+		// Add oAuth headers and content type headers	
+		$request = array(
+			'method' => 'POST',
+			'header' => array(
+				'Content-Type' => 'application/json',
+				'Authorization' => $authHeader,
+			),
+			'uri' => $endPoint,
+			'body' => $json,
+		);
+		// Attempt to make REST request
+		$response = $this->HttpSocket->request($request);
+		// Decode the JSON
+		$responseArray = json_decode($response->body, true);
+		if ($response->code == 200) {
+			// Return an array
+			return $responseArray;
+		} else {
+			$message = (isset($responseArray['message'])) ? $responseArray['message'] : __d('paypal', 'There was an problem communicating with the payment gateway') ;
+			throw new PaypalException($message);
+		}
+	}
+	
+/**
+ * Charge a stored card
+ *
+ * @return void
+ * @author Rob Mcvey
+ * @link https://developer.paypal.com/docs/integration/direct/store-a-credit-card/#use-a-stored-credit-card
+ **/
+	public function chargeStoredCard($transaction) {
+		// HttpSocket
+		if (!$this->HttpSocket) {
+			$this->HttpSocket = new HttpSocket();
+		}
+		// Get access token
+		$token = $this->getOAuthAccessToken();
+		$authHeader = sprintf('%s %s', $token['token_type'], $token['access_token']);
+		// Reset the HttpSocket as it's already been setup (with headers) by getOAuthAccessToken
+		$this->HttpSocket->reset();
+		// Get charge card endpoint
+		$endPoint = $this->chargeStoredCardUrl();
+		// JSON encode our card array
+		$json = json_encode($transaction);
+		// Add oAuth headers and content type headers	
+		$request = array(
+			'method' => 'POST',
+			'header' => array(
+				'Content-Type' => 'application/json',
+				'Authorization' => $authHeader,
+			),
+			'uri' => $endPoint,
+			'body' => $json,
+		);
+		// Attempt to make REST request
+		$response = $this->HttpSocket->request($request);
+		// Decode the JSON
+		$responseArray = json_decode($response->body, true);
+		if ($response->code == 200) {
+			// Return an array
+			return $responseArray;
+		} else {
+			$message = (isset($responseArray['message'])) ? $responseArray['message'] : __d('paypal', 'There was an problem communicating with the payment gateway') ;
+			throw new PaypalException($message);
+		}
+	}
+	
+/**
+ * Get an access token
+ *
+ * @return void
+ * @author Rob Mcvey
+ * @link https://developer.paypal.com/docs/integration/direct/make-your-first-call/
+ **/
+	public function getOAuthAccessToken() {
+		// HttpSocket may be mocked
+		if (!$this->HttpSocket) {
+			$this->HttpSocket = new HttpSocket();
+		}
+		// Do we have both an ID and secret?
+		if (!$this->oAuthClientId || !$this->oAuthSecret) {
+			throw new PaypalException(__d('paypal', 'Missing client id/secret'));
+		}
+		// Set the auth as basic
+		$this->HttpSocket->configAuth('Basic', $this->oAuthClientId, $this->oAuthSecret);
+		// Get the token endpoint
+		$endPoint = $this->oAuthTokenUrl();
+		// Make the request
+		$response = $this->HttpSocket->post($endPoint, array(
+			"grant_type" => "client_credentials"
+		));
+		// Decode the JSON
+		$responseArray = json_decode($response->body, true);
+		if ($response->code == 200) {
+			// Return an array
+			return $responseArray;
+		} else {
+			$message = (isset($responseArray['message'])) ? $responseArray['message'] : __d('paypal', 'There was an problem communicating with the payment gateway') ;
+			throw new PaypalException($message);
+		}
+	}
+	
+/**
+ * Takes an array containing info of a single card, and formats as per storeCreditCard
+ * e.g.
+ *  $creditCard = array(
+ *  	'payer_id' => 186,
+ *  	'type' => 'Visa',
+ *  	'card' => '4008 0687 0641 8697 ',
+ *  	'expiry' => array(
+ *  	    'M' => '2',
+ *          'Y' => '2018',
+ *      ),
+ *  	'first_name' => 'Joe',
+ *  	'last_name' => 'Shopper'
+ *  );
+ *
+ * @return void
+ * @author Rob Mcvey
+ * @link https://developer.paypal.com/docs/integration/direct/store-a-credit-card/#store-a-credit-card
+ **/
+	public function formatStoreCreditCardArgs($creditCard) {
+		// Expiry
+		if (!isset($creditCard['expiry'])) {
+			throw new PaypalException(__d('paypal' , 'Must specify an expiry date'));
+		}
+		$dateKeys = array_keys($creditCard['expiry']);
+		sort($dateKeys); // Sort alphabetcially
+		if ($dateKeys != array('M' , 'Y')) {
+			throw new PaypalException(__d('paypal' , 'Must include a M and Y in expiry date'));
+		}
+		$month = $creditCard['expiry']['M'];
+		$year = $creditCard['expiry']['Y'];
+		// Check date not in past
+		$expiresTime = mktime(0, 0, 0, $month, 1, $year);
+		$nowTime = mktime(0, 0, 0, date('n'), 1, date('Y'));
+		if ($expiresTime < $nowTime) {
+			throw new PaypalException(__d('paypal' , 'Invalid expiry date'));
+		}
+		// Strip white space
+		$number = preg_replace("/\s/" , "" , $creditCard['card']);
+		// Check card
+		if (!$this->validateCC($creditCard['card'])) {
+			throw new PaypalException(__d('paypal' , 'Invalid card number'));
+		}
+		// CVV2
+		if (!isset($creditCard['cvv2']) || empty($creditCard['cvv2'])) {
+			throw new PaypalException(__d('paypal' , 'Invalid CVV2 number'));
+		}
+		// Type
+		$type = trim(strtolower($creditCard['type']));
+		// Mastercard is not CamelCase
+		if (!in_array($type, array('visa', 'mastercard', 'amex', 'discover', 'Maestro'))) {
+			throw new PaypalException(__d('paypal' , 'Invalid card type'));
+		}
+		// Build our array as per Paypal docs
+		$object = array (
+			'number' => $number,
+			'cvv2' => $creditCard['cvv2'],
+			'type' => $type,
+			'expire_month' => $month,
+			'expire_year' => $year,
+			'payer_id' => $creditCard['payer_id'],
+			'first_name' => $creditCard['first_name'],
+			'last_name' => $creditCard['last_name'],
+			//'billing_address' => $creditCard['billing_address'],
+		);
+		return $object;
+	}
+	
+/**
+ * Validates a credit card number
+ * Note: We use this becuase when storing a card, paypal doen not validate!!!
+ *
+ * @return void
+ * @author Rob Mcvey
+ **/
+	public function validateCC($cc) {
+		return Validation::cc($cc);
+	}
+	
 /**
  * Takes a payment array and formats in to the minimum NVPs to complete a payment
  *
@@ -514,24 +714,20 @@ class Paypal {
 		if (empty($ipAddress)) {
 			throw new PaypalException(__d('paypal' , 'Could not detect client IP address'));
 		}
-
 		// Credit card number
 		if (!isset($payment['card'])) {
 			throw new PaypalException(__d('paypal' , 'Not a valid credit card number'));
 		}
 		$payment['card'] = preg_replace("/\s/" , "" , $payment['card']);
-
 		// Credit card number
 		if (!isset($payment['cvv'])) {
 			throw new PaypalException(__d('paypal' , 'You must include the 3 digit security number'));
 		}
 		$payment['cvv'] = preg_replace("/\s/" , "" , $payment['cvv']);
-
 		// Amount
 		if (!isset($payment['amount'])) {
 			throw new PaypalException(__d('paypal' , 'Must specify an "amount" to charge'));
 		}
-
 		// Expiry
 		if (!isset($payment['expiry'])) {
 			throw new PaypalException(__d('paypal' , 'Must specify an expiry date'));
@@ -544,12 +740,7 @@ class Paypal {
 		$month = $payment['expiry']['M'];
 		$year = $payment['expiry']['Y'];
 		$expiry = sprintf('%d%d' , $month, $year);
-
-		$currency = 'GBP';
-		if(isset($payment['currency'])){
-			$currency = strtoupper($payment['currency']);
-		}
-
+		// Build NVps
 		$nvps = array(
 			'METHOD' => 'DoDirectPayment',
 			'VERSION' => $this->paypalClassicApiVersion,
@@ -557,19 +748,19 @@ class Paypal {
 			'PWD' => $this->nvpPassword,
 			'SIGNATURE' => $this->nvpSignature,
 			'IPADDRESS' => $ipAddress, 		// Required
-			'AMT' => $payment['amount'], 		// The total cost of the transaction
-			'CURRENCYCODE' => $currency,		// A 3-character currency code
-			'RECURRING' => 'N',			// Recurring flag
+			'AMT' => $payment['amount'], 	// The total cost of the transaction
+			'CURRENCYCODE' => 'GBP',		// A 3-character currency code
+			'RECURRING' => 'N',				// Recurring flag
 			'ACCT' => $payment['card'],		// Numeric characters only with no spaces
 			'EXPDATE' => $expiry,			// MMYYYY
 			'CVV2' => $payment['cvv'],		// xxx
-			'FIRSTNAME' => '',			// Required
-			'LASTNAME' => '', 			// Required
-			'STREET' => '', 			// Required
-			'CITY' => '', 				// Required
-			'STATE' => '', 				// Required
+			'FIRSTNAME' => '',				// Required
+			'LASTNAME' => '', 				// Required
+			'STREET' => '', 				// Required
+			'CITY' => '', 					// Required
+			'STATE' => '', 					// Required
 			'COUNTRYCODE' => '',			// Required 2 single-byte characters
-			'ZIP' => '', 				// Required
+			'ZIP' => '', 					// Required
 		);
 		return $nvps;
 	}
@@ -603,17 +794,10 @@ class Paypal {
 			'PAYMENTREQUEST_0_CURRENCYCODE' => $order['currency'],
 			'PAYMENTREQUEST_0_DESC' => $order['description'],
 		);
-
 		// Custom field?
 		if (isset($order['custom'])) {
 			$nvps['PAYMENTREQUEST_0_CUSTOM'] = $order['custom'];
 		}
-
-		// Notify URL?
-		if (isset($order['notifyUrl'])) {
-			$nvps['PAYMENTREQUEST_0_NOTIFYURL'] = $order['notifyUrl'];
-		}
-
 		// Add up each item and calculate totals
 		if (isset($order['items']) && is_array($order['items'])) {
 			$items_subtotal = array_sum(Hash::extract($order , 'items.{n}.subtotal'));
@@ -638,14 +822,14 @@ class Paypal {
 		}
 		return $nvps;
 	}
-
+	
 /**
  * Takes a refund transaction array and formats in to the minimum NVPs to process a refund
  *
  * @param array original transaction details and refund amount
  * @return array Formatted array of Paypal NVPs for RefundTransaction
  * @author James Mikkelson
- **/
+**/
 	public function formatRefundTransactionNvps($refund) {
 		// PayPal Transcation ID
 		if (!isset($refund['transactionId'])) {
@@ -656,7 +840,6 @@ class Paypal {
 		if (!isset($refund['amount'])) {
 			throw new PaypalException(__d('paypal' , 'Must specify an "amount" to refund'));
 		}
-		
 		// Type of refund
 		if (!isset($refund['type'])) {
 			throw new PaypalException(__d('paypal' , 'You must specify a refund type, such as Full or Partial'));
@@ -681,11 +864,11 @@ class Paypal {
 			'REFUNDTYPE' => $refund['type'],				// Full, Partial, ExternalDispute, Other
 			'CURRENCYCODE' => $currency, 					// Only required for partial refunds or refunds greater than 100%
 			'NOTE' => $note,								// Up to 255 characters of information displayed to customer
-			'REFUNDSOURCE' => $source,						// any, default, instant, eCheck		
+			'REFUNDSOURCE' => $source,						// Any, default, instant, eCheck
 		);	
 		// Refund amount, only set if REFUNDTYPE is Partial
 		if ($refund['type'] == 'Partial') {
-			$nvps['AMT'] = $refund['amount']; 
+			$nvps['AMT'] = $refund['amount'];
 		}
 		return $nvps;
 	}
@@ -715,6 +898,36 @@ class Paypal {
 		}
 		return $this->liveClassicEndpoint;
 	}
+
+/**
+ * oAuthTokenUrl
+ *
+ * @return void
+ * @author Rob Mcvey
+ **/
+	public function oAuthTokenUrl() {
+		return $this->getRestEndpoint() . '/v1/oauth2/token';
+	}
+	
+/**
+ * chargeStoredCardUrl
+ *
+ * @return void
+ * @author Rob Mcvey
+ **/
+	public function chargeStoredCardUrl() {
+		return $this->getRestEndpoint() . '/v1/payments/payment';
+	}
+	
+/**
+ * storeCreditCardUrl
+ *
+ * @return void
+ * @author Rob Mcvey
+ **/
+	public function storeCreditCardUrl() {
+		return $this->getRestEndpoint() . '/v1/vault/credit-card';
+	}	
 
 /**
  * Returns Paypal Adaptive Accounts API endpoint

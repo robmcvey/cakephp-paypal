@@ -40,12 +40,11 @@ git clone -b master git://github.com/robmcvey/cakephp-paypal.git Paypal
 
 Make sure the plugin is loaded in `app/Config/bootstrap.php`.
 
-You can either load them one by one or all of them in a single call:
+```
+CakePlugin::load('Paypal');
+```
 
-```
-CakePlugin::loadAll(); 		// Loads all plugins at once
-CakePlugin::load('Paypal'); 	// Loads a single plugin named Paypal
-```
+## PayPal Classic Methods
 
 Create an instance of the class with your PayPal credentials. For testing purposes, ensure `sandboxMode` is set to `true`.
 
@@ -60,7 +59,7 @@ $this->Paypal = new Paypal(array(
 ));
 ```
 
-## SetExpressCheckout
+### SetExpressCheckout
 
 Create an order(s) in the following format. `setExpressCheckout` will return a string URL to redirect the customer to.
 
@@ -88,19 +87,26 @@ $order = array(
 		),
 	)
 );
-
-$this->Paypal->setExpressCheckout($order);
+ try {
+	$this->Paypal->setExpressCheckout($order);
+} catch (Exception $e) {
+	// $e->getMessage();
+}	
 ```
 
-## GetExpressCheckoutDetails
+### GetExpressCheckoutDetails
 
 Once the customer has returned to your site (see `return` URL above) you can request their details with the token returned from the `SetExpressCheckout` method.
 
 ```php
-$this->Paypal->getExpressCheckoutDetails($token);
+try {
+	$this->Paypal->getExpressCheckoutDetails($token);
+} catch (Exception $e) {
+	// $e->getMessage();
+}		
 ```
 
-## DoExpressCheckoutPayment
+### DoExpressCheckoutPayment
 
 Complete the transaction using the same order details. The `$token` and `$payerId` will be returned from the `SetExpressCheckout` method.
 
@@ -129,10 +135,14 @@ $order = array(
 	)
 );
 
-$this->Paypal->doExpressCheckoutPayment($order, $token, $payerId);
+try {
+	$this->Paypal->doExpressCheckoutPayment($order, $token, $payerId);
+} catch (Exception $e) {
+	// $e->getMessage();
+}	
 ```
 
-## DoDirectPayment
+### DoDirectPayment
 
 Charge a credit card. Ensure you are using SSL and following PCI compliance guidelines.
 
@@ -148,22 +158,138 @@ $payment = array(
 	'currency' => 'USD' // Defaults to GBP if not provided
 );
 
-$this->Paypal->doDirectPayment($payment);
+try {
+	$this->Paypal->doDirectPayment($payment);
+} catch (Exception $e) {
+	// $e->getMessage();
+}	
 ```
 
-## RefundTransaction
+### RefundTransaction
 
 Refund a transction. Transactions can only be refunded up to 60 days after the completion date.
 
 ```php
 $refund = array(
-	'transactionId' => '96L684679W100181R' // Original PayPal Transcation ID
-	'type' => 'Partial', // Full, Partial, ExternalDispute, Other
-	'amount' => 30.00, // Amount to refund, only required if Refund Type is Partial
-	'note' => 'Refund because we are nice',  // Optional note to customer
-	'reference' => 'abc123',  // Optional internal reference
-	'currency' => 'USD'  // Defaults to GBP if not provided
+	'transactionId' => '96L684679W100181R' 	// Original PayPal Transcation ID
+	'type' => 'Partial', 					// Full, Partial, ExternalDispute, Other
+	'amount' => 30.00, 						// Amount to refund, only required if Refund Type is Partial
+	'note' => 'Refund because we are nice',	// Optional note to customer
+	'reference' => 'abc123',  				// Optional internal reference
+	'currency' => 'USD'  					// Defaults to GBP if not provided
 );
 
-$this->Paypal->refundTransaction($refund);
+try {
+	$this->Paypal->refundTransaction($refund);
+} catch (Exception $e) {
+	// $e->getMessage();
+}	
 ```
+
+## PayPal REST Methods
+
+Create an instance of the class with your PayPal credentials, including your client ID and secret key For testing purposes, ensure `sandboxMode` is set to `true`.
+
+```php
+App::uses('Paypal', 'Paypal.Lib');
+
+$this->Paypal = new Paypal(array(
+	'sandboxMode' => true,
+	'nvpUsername' => '{username}',
+	'nvpPassword' => '{password}',
+	'nvpSignature' => '{signature}',
+	'oAuthClientId' => '{client ID}',
+	'oAuthSecret' => '{secret key}',
+));
+```
+
+### Store card in vault
+
+```php
+$creditCard = array(
+	'payer_id' => 186,
+	'type' => 'visa',
+	'card' => 'xxxxxxxxxxxx8697',
+	'cvv2' => 232,
+	'expiry' => array(
+	    'M' => '2',
+        'Y' => '2018',
+    ),
+	'first_name' => 'Joe',
+	'last_name' => 'Shopper'
+);
+
+try {
+	$this->Paypal->storeCreditCard($creditCard);
+} catch (Exception $e) {
+	// $e->getMessage();
+}	
+```
+
+### Charge a stored card
+
+```php
+$cardPayment = array(
+	'intent' => 'sale',
+	'payer' => array(
+		'payment_method' => 'credit_card',
+		'funding_instruments' => array(
+			0 => array(
+				'credit_card_token' => array(
+					'credit_card_id' => 'CARD-39N7854321M2DDC2',
+					'payer_id' => '186'
+				)
+			)
+		)
+	),
+	'transactions' => array(
+		0 => array(
+			'amount' => array(
+				'total' => '0.60',
+				'currency' => 'GBP',
+				"details" => array(
+					"subtotal" => "0.50",
+					"tax" => "0.10",
+					"shipping" => "0.00"
+		        )
+			),
+			'description' => 'This is test payment'
+		)
+	)
+);
+
+try {
+	$this->Paypal->chargeStoredCard($cardPayment);
+} catch (Exception $e) {
+	// $e->getMessage();
+}	
+```
+
+## PayPal Adaptive Payments
+
+Create an instance of the class with your PayPal credentials, including your Adaptive App ID and Adaptive username. For testing purposes, ensure `sandboxMode` is set to `true`.
+
+```php
+App::uses('Paypal', 'Paypal.Lib');
+
+$this->Paypal = new Paypal(array(
+	'sandboxMode' => true,
+	'nvpUsername' => '{username}',
+	'nvpPassword' => '{password}',
+	'nvpSignature' => '{signature}',
+	'adaptiveAppID' => 'APP-80W284485P519543T',
+	'adaptiveUserID' => '5783770_biz_api1.gmail.com'
+));
+```
+
+### GetVerifiedStatus
+
+The GetVerifiedStatus API operation lets you determine whether the specified PayPal account's status is verified or unverified.
+
+```php
+try {
+	$this->Paypal->getVerifiedStatus('hello@gmail.com')
+} catch (Exception $e) {
+	// $e->getMessage();
+}	
+````

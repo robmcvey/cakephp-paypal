@@ -352,7 +352,6 @@ class PaypalTestCase extends CakeTestCase {
 			->method('post')
 			->with($this->equalTo($expectedEndpoint) , $this->equalTo($expectedNvps))
 			->will($this->throwException(new SocketException('A socket exception')));
-
 		$result = $this->Paypal->doDirectPayment($payment);
     }
 
@@ -636,7 +635,6 @@ class PaypalTestCase extends CakeTestCase {
  * @author Chris Green
  */
 	public function testGetErrorMessage() {
-
 		// Setup PayPal
 		$this->Paypal = new Paypal(array(
 			'sandboxMode' => true,
@@ -644,7 +642,6 @@ class PaypalTestCase extends CakeTestCase {
 			'nvpPassword' => 'bar',
 			'nvpSignature' => 'foobar'
 		));
-
 		// The parsed response
 		$parsed = array(
 			'TIMESTAMP' => '2013-09-11T20:39:58Z',
@@ -663,12 +660,9 @@ class PaypalTestCase extends CakeTestCase {
 			'AVSCODE' => 'G',
 			'CVV2MATCH' => 'N'
 		);
-
 		$result = $this->Paypal->getErrorMessage($parsed);
-
 		// Is it the custom message
 		$this->assertEqual($result, 'The transaction was declined by the issuing bank, not the payment gateway. The merchant should attempt another card.');
-
 	}
 
 /**
@@ -677,7 +671,6 @@ class PaypalTestCase extends CakeTestCase {
  * @author Chris Green
  */
 	public function testGetErrorMessageNone() {
-
 		// Setup Paypal
 		$this->Paypal = new Paypal(array(
 			'sandboxMode' => true,
@@ -685,7 +678,6 @@ class PaypalTestCase extends CakeTestCase {
 			'nvpPassword' => 'bar',
 			'nvpSignature' => 'foobar'
 		));
-
 		// The parsed response
 		$parsed = array(
 			'TIMESTAMP' => '2013-09-11T20:39:58Z',
@@ -704,12 +696,9 @@ class PaypalTestCase extends CakeTestCase {
 			'AVSCODE' => 'G',
 			'CVV2MATCH' => 'N'
 		);
-
 		$result = $this->Paypal->getErrorMessage($parsed);
-
 		// Is it L_LONGMESSAGE0
 		$this->assertEqual($result, 'Item total is invalid.');
-
 	}
 
 /**
@@ -1099,7 +1088,6 @@ class PaypalTestCase extends CakeTestCase {
 			'return' => 'https://www.my-amazing-clothes-store.com/review-paypal.php',
 			'cancel' => 'https://www.my-amazing-clothes-store.com/checkout.php',
 			'custom' => 'bingbong',
-			'notifyUrl' => 'http://www.my-ipn-listener-url.com/some-where.php',
 			'items' => array(
 				0 => array(
 					'name' => 'Blue shoes',
@@ -1133,7 +1121,6 @@ class PaypalTestCase extends CakeTestCase {
 			'PAYMENTREQUEST_0_AMT' => 20.00,
 			'PAYMENTREQUEST_0_DESC' => 'Your purchase with Acme clothes store',
 			'PAYMENTREQUEST_0_CUSTOM' => 'bingbong',
-			'PAYMENTREQUEST_0_NOTIFYURL' => 'http://www.my-ipn-listener-url.com/some-where.php',
 			'L_PAYMENTREQUEST_0_NAME0' => 'Blue shoes',
 			'L_PAYMENTREQUEST_0_DESC0' => 'A pair of really great blue shoes',
 			'L_PAYMENTREQUEST_0_TAXAMT0' => 2.00,
@@ -1382,7 +1369,7 @@ class PaypalTestCase extends CakeTestCase {
  * @return void
  * @author Rob Mcvey
  * @expectedException PaypalException
- * @expectedException Original PayPal Transaction ID is required
+ * @expectedExceptionMessage Original PayPal Transaction ID is required
  **/
 	public function testFormatRefundTransactionNvpsMissingTransId() {
 		$this->Paypal = new Paypal(array(
@@ -1394,14 +1381,14 @@ class PaypalTestCase extends CakeTestCase {
 		$refund = array();
 		$this->Paypal->formatRefundTransactionNvps($refund);
 	}
-	
+
 /**
  * testFormatRefundTransactionNvpsMissingAmt
  *
  * @return void
  * @author Rob Mcvey
  * @expectedException PaypalException
- * @expectedException Must specify an "amount" to refund
+ * @expectedExceptionMessage Must specify an "amount" to refund
  **/
 	public function testFormatRefundTransactionNvpsMissingAmt() {
 		$this->Paypal = new Paypal(array(
@@ -1415,14 +1402,14 @@ class PaypalTestCase extends CakeTestCase {
 		);
 		$this->Paypal->formatRefundTransactionNvps($refund);
 	}
-	
+
 /**
  * testFormatRefundTransactionNvpsMissingType
  *
  * @return void
  * @author Rob Mcvey
  * @expectedException PaypalException
- * @expectedException You must specify a refund type, such as Full or Partial
+ * @expectedExceptionMessage You must specify a refund type, such as Full or Partial
  **/
 	public function testFormatRefundTransactionNvpsMissingType() {
 		$this->Paypal = new Paypal(array(
@@ -1437,7 +1424,7 @@ class PaypalTestCase extends CakeTestCase {
 		);
 		$this->Paypal->formatRefundTransactionNvps($refund);
 	}
-	
+
 /**
  * testFormatRefundTransactionNvps
  *
@@ -1472,7 +1459,7 @@ class PaypalTestCase extends CakeTestCase {
 		);
 		$this->assertEqual($expected, $nvps);
 	}
-	
+
 /**
  * testFormatRefundTransactionNvpsWithOptions
  *
@@ -1573,7 +1560,7 @@ class PaypalTestCase extends CakeTestCase {
 		);
 		$this->assertEqual($expectedParsedResponse, $result);
 	}		
-	
+
 /**
  * testRefundTransactionRequestPartial
  *
@@ -1617,7 +1604,6 @@ class PaypalTestCase extends CakeTestCase {
 			->method('post')
 			->with($this->equalTo($expectedEndpoint) , $this->equalTo($expectedNvps))
 			->will($this->returnValue($mockResponse));
-
 		$result = $this->Paypal->refundTransaction($refund);
 		$expectedParsedResponse = array(
 			'REFUNDTRANSACTIONID' => '7A85962474587184P',
@@ -1636,5 +1622,1001 @@ class PaypalTestCase extends CakeTestCase {
 		);
 		$this->assertEqual($expectedParsedResponse, $result);
 	}
+	
+/**
+ * testValidateCC
+ *
+ * @return void
+ * @author Rob Mcvey
+ **/
+	public function testValidateCC() {
+		$this->Paypal = new Paypal(array(
+			'sandboxMode' => true,
+			'nvpUsername' => 'foo',
+			'nvpPassword' => 'bar',
+			'nvpSignature' => 'foobar',
+			'oAuthClientId' => 'ASPu1-BDs2U35hVQkITi2WzX98cbNahkSeoxsuvfmrXNTz-gA5EGslxk0fAFU',
+			'oAuthSecret' => 'QO6RKRBxI2co80qlfPHYQ14G-U9Smbz4H8fUIY9Mf846URRNdYNNXQ2wghxC',
+		));
+		$this->assertFalse($this->Paypal->validateCC('hello'));
+		$this->assertFalse($this->Paypal->validateCC('2341324'));
+		$this->assertTrue($this->Paypal->validateCC('4008 0687 0641 8697 '));
+	}
+	
+/**
+ * testStoreCreditCard
+ *
+ * @return void
+ * @author Rob Mcvey
+ **/
+	public function testStoreCreditCard() {
+		$this->Paypal = new Paypal(array(
+			'sandboxMode' => true,
+			'nvpUsername' => 'foo',
+			'nvpPassword' => 'bar',
+			'nvpSignature' => 'foobar',
+			'oAuthClientId' => 'ASPu1-BDs2U35hVQkITi2WzX98cbNahkSeoxsuvfmrXNTz-gA5EGslxk0fAFU',
+			'oAuthSecret' => 'QO6RKRBxI2co80qlfPHYQ14G-U9Smbz4H8fUIY9Mf846URRNdYNNXQ2wghxC',
+		));
+		// Mock the HttpSocket classs
+		$this->Paypal->HttpSocket = $this->getMock('HttpSocket');
+		// Mock the HttpSocket configAuth method
+		$this->Paypal->HttpSocket->expects($this->once())
+			->method('configAuth')
+			->with('Basic', 'ASPu1-BDs2U35hVQkITi2WzX98cbNahkSeoxsuvfmrXNTz-gA5EGslxk0fAFU', 'QO6RKRBxI2co80qlfPHYQ14G-U9Smbz4H8fUIY9Mf846URRNdYNNXQ2wghxC');
+		// Mock the HttpSocket post method
+		$expectedTokenResponse = json_encode(array(
+			'scope' => 'openid https://api.paypal.com/v1/payments/.* https://api.paypal.com/v1/developer/.* https://api.paypal.com/v1/vault/credit-card/.* https://api.paypal.com/v1/vault/credit-card',
+			'access_token' => 'OfQ0Q3pYoy0MSHY4d2ZL8HcKPBE0ZDn1qCe.mkrDTkE',
+			'token_type' => 'Bearer',
+			'app_id' => 'APP-80W284485P519543T',
+			'expires_in' => 28800
+		));
+		
+		$HttpSocketResponse = new stdClass();
+		$HttpSocketResponse->body = $expectedTokenResponse;
+		$HttpSocketResponse->code = 200;
+		
+		$this->Paypal->HttpSocket->expects($this->once())
+			->method('post')
+			->with('https://api.sandbox.paypal.com/v1/oauth2/token', array(
+				"grant_type" => "client_credentials"
+			))
+			->will($this->returnValue($HttpSocketResponse));
+			
+		// Mock the HttpSocket reset method
+		$this->Paypal->HttpSocket->expects($this->once())
+			->method('reset');
+		// Mock the HttpSocket request method
+		$mockResponse = '{"id":"CARD-5LH05598KW1155459KMYXT7I","state":"ok","payer_id":"186","type":"visa","number":"xxxxxxxxxxxx8697","expire_month":"2","expire_year":"2018","first_name":"Joe","last_name":"Shopper","valid_until":"2017-03-24T00:00:00Z","create_time":"2014-03-25T12:43:41Z","update_time":"2014-03-25T12:43:41Z","links":[{"href":"https://api.sandbox.paypal.com/v1/vault/credit-card/CARD-5LH05598KW1155459KMYXT7I","rel":"self","method":"GET"},{"href":"https://api.sandbox.paypal.com/v1/vault/credit-card/CARD-5LH05598KW1155459KMYXT7I","rel":"delete","method":"DELETE"},{"href":"https://api.sandbox.paypal.com/v1/vault/credit-card/CARD-5LH05598KW1155459KMYXT7I","rel":"patch","method":"PATCH"}]}';
+		
+		$HttpSocketResponse = new stdClass();
+		$HttpSocketResponse->body = $mockResponse;
+		$HttpSocketResponse->code = 200;
+		
+		$mockRequest = array(
+			'method' => 'POST',
+			'header' => array(
+				'Content-Type' => 'application/json',
+				'Authorization' => 'Bearer OfQ0Q3pYoy0MSHY4d2ZL8HcKPBE0ZDn1qCe.mkrDTkE'
+			),
+			'uri' => 'https://api.sandbox.paypal.com/v1/vault/credit-card',
+			'body' => '{"number":"4008068706418697","cvv2":232,"type":"visa","expire_month":"2","expire_year":"2018","payer_id":186,"first_name":"Joe","last_name":"Shopper"}'
+		);
+		$this->Paypal->HttpSocket->expects($this->once())
+			->method('request')
+			->with($this->equalTo($mockRequest))
+			->will($this->returnValue($HttpSocketResponse));
+		// Call the storeCreditCard method
+		$creditCard = array(
+			'payer_id' => 186,
+			'type' => 'visa',
+			'card' => '4008 0687 0641 8697 ',
+			'cvv2' => 232,
+			'expiry' => array(
+			    'M' => '2',
+		        'Y' => '2018',
+		    ),
+			'first_name' => 'Joe',
+			'last_name' => 'Shopper'
+		);
+		$result = $this->Paypal->storeCreditCard($creditCard);
+		// Our expected response
+		$expectedResult = array(
+			'id' => 'CARD-5LH05598KW1155459KMYXT7I',
+			'state' => 'ok',
+			'payer_id' => '186',
+			'type' => 'visa',
+			'number' => 'xxxxxxxxxxxx8697',
+			'expire_month' => '2',
+			'expire_year' => '2018',
+			'first_name' => 'Joe',
+			'last_name' => 'Shopper',
+			'valid_until' => '2017-03-24T00:00:00Z',
+			'create_time' => '2014-03-25T12:43:41Z',
+			'update_time' => '2014-03-25T12:43:41Z',
+			'links' => array(
+				0 => array(
+					'href' => 'https://api.sandbox.paypal.com/v1/vault/credit-card/CARD-5LH05598KW1155459KMYXT7I',
+					'rel' => 'self',
+					'method' => 'GET'
+				),
+				1 => array(
+					'href' => 'https://api.sandbox.paypal.com/v1/vault/credit-card/CARD-5LH05598KW1155459KMYXT7I',
+					'rel' => 'delete',
+					'method' => 'DELETE'
+				),
+				2 => array(
+					'href' => 'https://api.sandbox.paypal.com/v1/vault/credit-card/CARD-5LH05598KW1155459KMYXT7I',
+					'rel' => 'patch',
+					'method' => 'PATCH'
+				)
+			)
+		);
+		$this->assertEqual($expectedResult, $result);
+	}
 
+/**
+ * testStoreCreditCardErrorResponse
+ *
+ * @return void
+ * @author Rob Mcvey
+ * @expectedException PaypalException
+ * @expectedExceptionMessage Invalid request - see details
+ **/
+	public function testStoreCreditCardErrorResponse() {
+		$this->Paypal = new Paypal(array(
+			'sandboxMode' => true,
+			'nvpUsername' => 'foo',
+			'nvpPassword' => 'bar',
+			'nvpSignature' => 'foobar',
+			'oAuthClientId' => 'ASPu1-BDs2U35hVQkITi2WzX98cbNahkSeoxsuvfmrXNTz-gA5EGslxk0fAFU',
+			'oAuthSecret' => 'QO6RKRBxI2co80qlfPHYQ14G-U9Smbz4H8fUIY9Mf846URRNdYNNXQ2wghxC',
+		));
+		// Mock the HttpSocket classs
+		$this->Paypal->HttpSocket = $this->getMock('HttpSocket');
+		// Mock the HttpSocket configAuth method
+		$this->Paypal->HttpSocket->expects($this->once())
+			->method('configAuth')
+			->with('Basic', 'ASPu1-BDs2U35hVQkITi2WzX98cbNahkSeoxsuvfmrXNTz-gA5EGslxk0fAFU', 'QO6RKRBxI2co80qlfPHYQ14G-U9Smbz4H8fUIY9Mf846URRNdYNNXQ2wghxC');
+		// Mock the HttpSocket post method
+		$expectedTokenResponse = json_encode(array(
+			'scope' => 'openid https://api.paypal.com/v1/payments/.* https://api.paypal.com/v1/developer/.* https://api.paypal.com/v1/vault/credit-card/.* https://api.paypal.com/v1/vault/credit-card',
+			'access_token' => 'OfQ0Q3pYoy0MSHY4d2ZL8HcKPBE0ZDn1qCe.mkrDTkE',
+			'token_type' => 'Bearer',
+			'app_id' => 'APP-80W284485P519543T',
+			'expires_in' => 28800
+		));
+		// Mock response object
+		$HttpSocketResponse = new stdClass();
+		$HttpSocketResponse->body = $expectedTokenResponse;
+		$HttpSocketResponse->code = 200;
+		// Mock the post request
+		$this->Paypal->HttpSocket->expects($this->once())
+			->method('post')
+			->with('https://api.sandbox.paypal.com/v1/oauth2/token', array(
+				"grant_type" => "client_credentials"
+			))
+			->will($this->returnValue($HttpSocketResponse));	
+		// Mock the HttpSocket reset method
+		$this->Paypal->HttpSocket->expects($this->once())
+			->method('reset');
+		// Mock the HttpSocket request method
+		$mockResponse = '{"id":"CARD-5LH05598KW1155459KMYXT7I","state":"ok","payer_id":"186","type":"visa","number":"xxxxxxxxxxxx8697","expire_month":"2","expire_year":"2018","first_name":"Joe","last_name":"Shopper","valid_until":"2017-03-24T00:00:00Z","create_time":"2014-03-25T12:43:41Z","update_time":"2014-03-25T12:43:41Z","links":[{"href":"https://api.sandbox.paypal.com/v1/vault/credit-card/CARD-5LH05598KW1155459KMYXT7I","rel":"self","method":"GET"},{"href":"https://api.sandbox.paypal.com/v1/vault/credit-card/CARD-5LH05598KW1155459KMYXT7I","rel":"delete","method":"DELETE"},{"href":"https://api.sandbox.paypal.com/v1/vault/credit-card/CARD-5LH05598KW1155459KMYXT7I","rel":"patch","method":"PATCH"}]}';
+		// Our mock response (error)
+		$errorResponse = json_encode(array(
+			'name' => 'VALIDATION_ERROR',
+			'details' => array(
+				0 => array(
+					'field' => 'type',
+					'issue' => 'Value is invalid (must be visa, mastercard, amex, discover, or maestro)'
+				)
+			),
+			'message' => 'Invalid request - see details',
+			'information_link' => 'https://developer.paypal.com/docs/api/#VALIDATION_ERROR',
+			'debug_id' => 'a697c8e0f566f'
+		));
+		// Mock the response object again, this time 401 bad request code
+		$HttpSocketResponse = new stdClass();
+		$HttpSocketResponse->body = $errorResponse;
+		$HttpSocketResponse->code = 401;
+		// The request we expect to be sent
+		$mockRequest = array(
+			'method' => 'POST',
+			'header' => array(
+				'Content-Type' => 'application/json',
+				'Authorization' => 'Bearer OfQ0Q3pYoy0MSHY4d2ZL8HcKPBE0ZDn1qCe.mkrDTkE'
+			),
+			'uri' => 'https://api.sandbox.paypal.com/v1/vault/credit-card',
+			'body' => '{"number":"4008068706418697","cvv2":232,"type":"visa","expire_month":"2","expire_year":"2018","payer_id":186,"first_name":"Joe","last_name":"Shopper"}'
+		);
+		$this->Paypal->HttpSocket->expects($this->once())
+			->method('request')
+			->with($this->equalTo($mockRequest))
+			->will($this->returnValue($HttpSocketResponse));
+		// Call the storeCreditCard method
+		$creditCard = array(
+			'payer_id' => 186,
+			'type' => 'visa',
+			'card' => '4008 0687 0641 8697 ',
+			'cvv2' => 232,
+			'expiry' => array(
+			    'M' => '2',
+		        'Y' => '2018',
+		    ),
+			'first_name' => 'Joe',
+			'last_name' => 'Shopper'
+		);
+		$result = $this->Paypal->storeCreditCard($creditCard);
+	}	
+
+/**
+ * testStoreFormatCreditCardArgs
+ *
+ * @return void
+ * @author Rob Mcvey
+ **/
+	public function testStoreFormatCreditCardArgs() {
+		$this->Paypal = new Paypal(array(
+			'sandboxMode' => true,
+			'nvpUsername' => 'foo',
+			'nvpPassword' => 'bar',
+			'nvpSignature' => 'foobar'
+		));
+		$creditCard = array(
+			'payer_id' => 186,
+			'type' => 'visa',
+			'card' => '4008 0687 0641 8697 ',
+			'cvv2' => 232,
+			'expiry' => array(
+			    'M' => '2',
+		        'Y' => '2018',
+		    ),
+			'first_name' => 'Joe',
+			'last_name' => 'Shopper'
+		);
+		$expected = array(
+			"payer_id" => 186,
+			"type" => "visa",
+			"number" => "4008068706418697",
+			'cvv2' => 232,
+			"expire_month" => "2",
+			"expire_year" => "2018",
+			"first_name" => "Joe",
+			"last_name" => "Shopper"
+		);
+		$result = $this->Paypal->formatStoreCreditCardArgs($creditCard);
+		$this->assertEqual($expected, $result);
+	}
+	
+/**
+ * testStoreFormatCreditCardArgsMissingCard
+ *
+ * @return void
+ * @author Rob Mcvey
+ * @expectedException PaypalException
+ * @expectedExceptionMessage Invalid card number
+ **/
+	public function testStoreFormatCreditCardArgsMissingCard() {
+		$this->Paypal = new Paypal(array(
+			'sandboxMode' => true,
+			'nvpUsername' => 'foo',
+			'nvpPassword' => 'bar',
+			'nvpSignature' => 'foobar'
+		));
+		$creditCard = array(
+			'payer_id' => 186,
+			'type' => 'visa',
+			'card' => '4008',
+			'cvv2' => 232,
+			'expiry' => array(
+			    'M' => '2',
+		        'Y' => '2018',
+		    ),
+			'first_name' => 'Joe',
+			'last_name' => 'Shopper'
+		);
+		$result = $this->Paypal->formatStoreCreditCardArgs($creditCard);
+	}
+
+/**
+ * testStoreFormatCreditCardArgsMissingCVV2
+ *
+ * @return void
+ * @author Rob Mcvey
+ * @expectedException PaypalException
+ * @expectedExceptionMessage Invalid CVV2 number
+ **/
+	public function testStoreFormatCreditCardArgsMissingCVV2() {
+		$this->Paypal = new Paypal(array(
+			'sandboxMode' => true,
+			'nvpUsername' => 'foo',
+			'nvpPassword' => 'bar',
+			'nvpSignature' => 'foobar'
+		));
+		$creditCard = array(
+			'payer_id' => 186,
+			'type' => 'visa',
+			'card' => '4008 0687 0641 8697 ',
+			'expiry' => array(
+			    'M' => '2',
+		        'Y' => '2018',
+		    ),
+			'first_name' => 'Joe',
+			'last_name' => 'Shopper'
+		);
+		$result = $this->Paypal->formatStoreCreditCardArgs($creditCard);
+	}
+
+/**
+ * testStoreFormatCreditCardArgsInvalidDate
+ *
+ * @return void
+ * @author Rob Mcvey
+ * @expectedException PaypalException
+ * @expectedExceptionMessage Invalid expiry date
+ **/
+	public function testStoreFormatCreditCardArgsInvalidDate() {
+		$this->Paypal = new Paypal(array(
+			'sandboxMode' => true,
+			'nvpUsername' => 'foo',
+			'nvpPassword' => 'bar',
+			'nvpSignature' => 'foobar'
+		));
+		$creditCard = array(
+			'payer_id' => 186,
+			'type' => 'visa',
+			'card' => '4008 0687 0641 8697 ',
+			'cvv2' => 232,
+			'expiry' => array(
+			    'M' => '2',
+		        'Y' => '2001',
+		    ),
+			'first_name' => 'Joe',
+			'last_name' => 'Shopper'
+		);
+		$result = $this->Paypal->formatStoreCreditCardArgs($creditCard);
+	}
+	
+/**
+ * testStoreFormatCreditCardArgsInvalidType
+ *
+ * @return void
+ * @author Rob Mcvey
+ * @expectedException PaypalException
+ * @expectedExceptionMessage Invalid card type
+ **/
+	public function testStoreFormatCreditCardArgsInvalidType() {
+		$this->Paypal = new Paypal(array(
+			'sandboxMode' => true,
+			'nvpUsername' => 'foo',
+			'nvpPassword' => 'bar',
+			'nvpSignature' => 'foobar'
+		));
+		$creditCard = array(
+			'payer_id' => 186,
+			'type' => 'snarf',
+			'card' => '4008 0687 0641 8697 ',
+			'cvv2' => 232,
+			'expiry' => array(
+			    'M' => '2',
+		        'Y' => '2016',
+		    ),
+			'first_name' => 'Joe',
+			'last_name' => 'Shopper'
+		);
+		$result = $this->Paypal->formatStoreCreditCardArgs($creditCard);
+	}
+	
+/**
+ * testStoreCreditCardUrl
+ *
+ * @return void
+ * @author Rob Mcvey
+ **/
+	public function testStoreCreditCardUrl() {
+		$this->Paypal = new Paypal(array(
+			'sandboxMode' => true,
+			'nvpUsername' => 'foo',
+			'nvpPassword' => 'bar',
+			'nvpSignature' => 'foobar'
+		));
+		$endpoint = $this->Paypal->storeCreditCardUrl();
+		$this->assertEqual('https://api.sandbox.paypal.com/v1/vault/credit-card', $endpoint);
+	}
+	
+/**
+ * testGetOAuthAccessToken
+ *
+ * @return void
+ * @author Rob Mcvey
+ **/
+	public function testGetOAuthAccessToken() {
+		$this->Paypal = new Paypal(array(
+			'sandboxMode' => true,
+			'nvpUsername' => 'foo',
+			'nvpPassword' => 'bar',
+			'nvpSignature' => 'foobar',
+			'oAuthClientId' => '1ROu-BDs2U35hVZkITi2WzX98cbNahkSeoxsuvfmrXNTz-gA5EGslxk0fAFU',
+			'oAuthSecret' => 'FO6RKRBsI2co80qlfPHYQ14G-U9Smbz4H8fUIY9Mf846URRNdYNNXQ2wghxC',
+		));
+		// Mock the HttpSocket classs
+		$this->Paypal->HttpSocket = $this->getMock('HttpSocket');
+		// Mock the HttpSocket configAuth method
+		$this->Paypal->HttpSocket->expects($this->once())
+			->method('configAuth')
+			->with('Basic', '1ROu-BDs2U35hVZkITi2WzX98cbNahkSeoxsuvfmrXNTz-gA5EGslxk0fAFU', 'FO6RKRBsI2co80qlfPHYQ14G-U9Smbz4H8fUIY9Mf846URRNdYNNXQ2wghxC');
+		
+		$HttpSocketResponse = new stdClass();
+		$HttpSocketResponse->body = '{"scope":"openid https:\/\/api.paypal.com\/v1\/payments\/.* https:\/\/api.paypal.com\/v1\/developer\/.* https:\/\/api.paypal.com\/v1\/vault\/credit-card\/.* https:\/\/api.paypal.com\/v1\/vault\/credit-card","access_token":"V0jzza4UReFGZh3pf-APN3MwhvnATeG0kaQScgzIH3A","token_type":"Bearer","app_id":"APP-80W284485P519543T","expires_in":28800}';
+		$HttpSocketResponse->code = 200;
+		
+		// Mock the HttpSocket post method
+		$this->Paypal->HttpSocket->expects($this->once())
+			->method('post')
+			->with('https://api.sandbox.paypal.com/v1/oauth2/token', array(
+				"grant_type" => "client_credentials"
+			))
+			->will($this->returnValue($HttpSocketResponse));
+			
+		$result = $this->Paypal->getOAuthAccessToken();
+		// Expected response
+		$expected = array(
+			'scope' => 'openid https://api.paypal.com/v1/payments/.* https://api.paypal.com/v1/developer/.* https://api.paypal.com/v1/vault/credit-card/.* https://api.paypal.com/v1/vault/credit-card',
+			'access_token' => 'V0jzza4UReFGZh3pf-APN3MwhvnATeG0kaQScgzIH3A',
+			'token_type' => 'Bearer',
+			'app_id' => 'APP-80W284485P519543T',
+			'expires_in' => 28800
+		);
+		$this->assertEqual($expected, $result);
+	}
+	
+/**
+ * testGetOAuthAccessTokenHandlesError
+ *
+ * @return void
+ * @author Rob Mcvey
+ * @expectedException PaypalException
+ * @expectedExceptionMessage There was an problem communicating with the payment gateway
+ **/
+	public function testGetOAuthAccessTokenHandlesError() {
+		$this->Paypal = new Paypal(array(
+			'sandboxMode' => true,
+			'nvpUsername' => 'foo',
+			'nvpPassword' => 'bar',
+			'nvpSignature' => 'foobar',
+			'oAuthClientId' => '1ROu-BDs2U35hVZkITi2WzX98cbNahkSeoxsuvfmrXNTz-gA5EGslxk0fAFU',
+			'oAuthSecret' => 'FO6RKRBsI2co80qlfPHYQ14G-U9Smbz4H8fUIY9Mf846URRNdYNNXQ2wghxC',
+		));
+		// Mock the HttpSocket classs
+		$this->Paypal->HttpSocket = $this->getMock('HttpSocket');
+		// Mock the HttpSocket configAuth method
+		$this->Paypal->HttpSocket->expects($this->once())
+			->method('configAuth')
+			->with('Basic', '1ROu-BDs2U35hVZkITi2WzX98cbNahkSeoxsuvfmrXNTz-gA5EGslxk0fAFU', 'FO6RKRBsI2co80qlfPHYQ14G-U9Smbz4H8fUIY9Mf846URRNdYNNXQ2wghxC');
+		// Mock the response object
+		$HttpSocketResponse = new stdClass();
+		$HttpSocketResponse->body = '{"scope":"openid https:\/\/api.paypal.com\/v1\/payments\/.* https:\/\/api.paypal.com\/v1\/developer\/.* https:\/\/api.paypal.com\/v1\/vault\/credit-card\/.* https:\/\/api.paypal.com\/v1\/vault\/credit-card","access_token":"V0jzza4UReFGZh3pf-APN3MwhvnATeG0kaQScgzIH3A","token_type":"Bearer","app_id":"APP-80W284485P519543T","expires_in":28800}';
+		$HttpSocketResponse->code = 400;
+		// Mock the HttpSocket post method
+		$this->Paypal->HttpSocket->expects($this->once())
+			->method('post')
+			->with('https://api.sandbox.paypal.com/v1/oauth2/token', array(
+				"grant_type" => "client_credentials"
+			))
+			->will($this->returnValue($HttpSocketResponse));
+		// Get a token
+		$result = $this->Paypal->getOAuthAccessToken();
+		// Expected response
+		$expected = array(
+			'scope' => 'openid https://api.paypal.com/v1/payments/.* https://api.paypal.com/v1/developer/.* https://api.paypal.com/v1/vault/credit-card/.* https://api.paypal.com/v1/vault/credit-card',
+			'access_token' => 'V0jzza4UReFGZh3pf-APN3MwhvnATeG0kaQScgzIH3A',
+			'token_type' => 'Bearer',
+			'app_id' => 'APP-80W284485P519543T',
+			'expires_in' => 28800
+		);
+		$this->assertEqual($expected, $result);
+	}	
+
+/**
+ * testGetOAuthAccessTokenMissingCredentials
+ *
+ * @return void
+ * @author Rob Mcvey
+ * @expectedException PaypalException
+ * @expectedExceptionMessage Missing client id/secret
+ **/
+	public function testGetOAuthAccessTokenMissingCredentials() {
+		$this->Paypal = new Paypal(array(
+			'sandboxMode' => true,
+			'nvpUsername' => 'foo',
+			'nvpPassword' => 'bar',
+			'nvpSignature' => 'foobar',
+			'oAuthSecret' => 'FO6RKRBsI2co80qlfPHYQ14G-U9Smbz4H8fUIY9Mf846URRNdYNNXQ2wghxC',
+		));
+		// Mock the HttpSocket classs
+		$this->Paypal->HttpSocket = $this->getMock('HttpSocket');
+		// Mock the HttpSocket configAuth method
+		$this->Paypal->HttpSocket->expects($this->never())
+			->method('configAuth');
+		$this->Paypal->getOAuthAccessToken();
+	}	
+
+/**
+ * testOAuthTokenUrl
+ *
+ * @return void
+ * @author Rob Mcvey
+ **/
+	public function testOAuthTokenUrl() {
+		$this->Paypal = new Paypal(array(
+			'sandboxMode' => true,
+			'nvpUsername' => 'foo',
+			'nvpPassword' => 'bar',
+			'nvpSignature' => 'foobar'
+		));
+		$endpoint = $this->Paypal->oAuthTokenUrl();
+		$this->assertEqual('https://api.sandbox.paypal.com/v1/oauth2/token', $endpoint);
+	}
+
+/**
+ * testChargeStoredCardUrl
+ *
+ * @return void
+ * @author Rob Mcvey
+ **/
+	public function testChargeStoredCardUrl() {
+		$this->Paypal = new Paypal(array(
+			'sandboxMode' => true,
+			'nvpUsername' => 'foo',
+			'nvpPassword' => 'bar',
+			'nvpSignature' => 'foobar'
+		));
+		$endpoint = $this->Paypal->chargeStoredCardUrl();
+		$this->assertEqual('https://api.sandbox.paypal.com/v1/payments/payment', $endpoint);
+	}
+
+/**
+ * testChargeStoredCardUrlLive
+ *
+ * @return void
+ * @author Rob Mcvey
+ **/
+	public function testChargeStoredCardUrlLive() {
+		$this->Paypal = new Paypal(array(
+			'sandboxMode' => false,
+			'nvpUsername' => 'foo',
+			'nvpPassword' => 'bar',
+			'nvpSignature' => 'foobar'
+		));
+		$endpoint = $this->Paypal->chargeStoredCardUrl();
+		$this->assertEqual('https://api.paypal.com/v1/payments/payment', $endpoint);
+	}	
+	
+/**
+ * testChargeStoredCard
+ *
+ * @return void
+ * @author Rob Mcvey
+ **/
+	public function testChargeStoredCard() {
+		$this->Paypal = new Paypal(array(
+			'sandboxMode' => true,
+			'nvpUsername' => 'foo',
+			'nvpPassword' => 'bar',
+			'nvpSignature' => 'foobar',
+			'oAuthClientId' => 'ASPu1-BDs2U35hVZkITi2WzX98cbNahkSeoxsuvfmrXNTz-gA5EGslxk0fAFU',
+			'oAuthSecret' => 'EO6RKHYQ14G-U9Smbz4H8fUIY9Mf846URRNdYNNXQ2wghxC',
+		));
+		
+		$expectedTokenResponse = array(
+			'scope' => 'openid https://api.paypal.com/v1/payments/.* https://api.paypal.com/v1/vault/credit-card/.* https://api.paypal.com/v1/vault/credit-card',
+			'access_token' => 'Zr-NlxdL6u1kQNUNnG7SYUjsqFIk2OCI7wxGStzPEO8',
+			'token_type' => 'Bearer',
+			'app_id' => 'APP-7KR335967N254033H',
+			'expires_in' => 28800
+		);
+		
+		// Mock the HttpSocket classs
+		$this->Paypal->HttpSocket = $this->getMock('HttpSocket');
+		
+		// Mock the HttpSocket configAuth method
+		$this->Paypal->HttpSocket->expects($this->once())
+			->method('configAuth')
+			->with('Basic', 'ASPu1-BDs2U35hVZkITi2WzX98cbNahkSeoxsuvfmrXNTz-gA5EGslxk0fAFU', 'EO6RKHYQ14G-U9Smbz4H8fUIY9Mf846URRNdYNNXQ2wghxC');
+		
+		// Mock the HttpSocket post method
+		$expectedTokenResponse = json_encode($expectedTokenResponse);
+		
+		$HttpSocketResponse = new stdClass();
+		$HttpSocketResponse->body = $expectedTokenResponse;
+		$HttpSocketResponse->code = 200;
+		
+		$this->Paypal->HttpSocket->expects($this->once())
+			->method('post')
+			->with('https://api.sandbox.paypal.com/v1/oauth2/token', array(
+				"grant_type" => "client_credentials"
+			))
+			->will($this->returnValue($HttpSocketResponse));
+		
+		// Mock the HttpSocket reset method
+		$this->Paypal->HttpSocket->expects($this->once())
+			->method('reset');
+			
+		// Expected JSON to be posted to paypal
+		$expectedJSON = '{"intent":"sale","redirect_urls":{"return_url":"http:\/\/copify.com\/return","cancel_url":"http:\/\/copify.com\/cancel"},"payer":{"payment_method":"credit_card","funding_instruments":[{"credit_card_token":{"credit_card_id":"CARD-39N78604CK9041431KM2DDC2","payer_id":"186"}}]},"transactions":[{"amount":{"total":"0.60","currency":"GBP","details":{"subtotal":"0.50","tax":"0.10","shipping":"0.00"}},"description":"This is test payment to copify"}]}';	
+
+		// Our transaction, we'll build this from the users data
+		$cardPayment = array(
+			'intent' => 'sale',
+			"redirect_urls" => array(
+				"return_url" => "http://copify.com/return",
+				"cancel_url" => "http://copify.com/cancel"
+			),
+			'payer' => array(
+				'payment_method' => 'credit_card',
+				'funding_instruments' => array(
+					0 => array(
+						'credit_card_token' => array(
+							'credit_card_id' => 'CARD-39N78604CK9041431KM2DDC2',
+							'payer_id' => '186'
+						)
+					)
+				)
+			),
+			'transactions' => array(
+				0 => array(
+					'amount' => array(
+						'total' => '0.60',
+						'currency' => 'GBP',
+						"details" => array(
+							"subtotal" => "0.50",
+							"tax" => "0.10",
+							"shipping" => "0.00"
+				        )
+					),
+					'description' => 'This is test payment to copify'
+				)
+			)
+		);
+		
+		// The request we expect to send to paypal
+		$mockRequest = array(
+			'method' => 'POST',
+			'header' => array(
+				'Content-Type' => 'application/json',
+				'Authorization' => 'Bearer Zr-NlxdL6u1kQNUNnG7SYUjsqFIk2OCI7wxGStzPEO8'
+			),
+			'uri' => 'https://api.sandbox.paypal.com/v1/payments/payment',
+			'body' => $expectedJSON
+		);
+
+		// What we expect to het back from paypal (json encoded)
+		$expectedResponse = array(
+			'id' => 'PAY-8MD93335G6649645MKM2DDUY',
+			'create_time' => '2014-03-27T14:12:35Z',
+			'update_time' => '2014-03-27T14:12:38Z',
+			'state' => 'approved',
+			'intent' => 'sale',
+			'payer' => array(
+				'payment_method' => 'credit_card',
+				'funding_instruments' => array(
+					0 => array(
+						'credit_card_token' => array(
+							'credit_card_id' => 'CARD-39N78604CK9041431KM2DDC2',
+							'payer_id' => '186',
+							'last4' => '0515',
+							'type' => 'visa',
+							'expire_month' => '8',
+							'expire_year' => '2016'
+						)
+					)
+				)
+			),
+			'transactions' => array(
+				0 => array(
+					'amount' => array(
+						'total' => '0.60',
+						'currency' => 'GBP',
+						'details' => array(
+							'subtotal' => '0.50',
+							'tax' => '0.10'
+						)
+					),
+					'description' => 'This is test payment to copify',
+					'related_resources' => array(
+						0 => array(
+							'sale' => array(
+								'id' => '0XP264374T4869302',
+								'create_time' => '2014-03-27T14:12:35Z',
+								'update_time' => '2014-03-27T14:12:38Z',
+								'state' => 'completed',
+								'amount' => array(
+									'total' => '0.60',
+									'currency' => 'GBP'
+								),
+								'parent_payment' => 'PAY-8MD93335G6649645MKM2DDUY',
+								'links' => array(
+									0 => array(
+										'href' => 'https://api.paypal.com/v1/payments/sale/0XP264374T4869302',
+										'rel' => 'self',
+										'method' => 'GET'
+									),
+									1 => array(
+										'href' => 'https://api.paypal.com/v1/payments/sale/0XP264374T4869302/refund',
+										'rel' => 'refund',
+										'method' => 'POST'
+									),
+									2 => array(
+										'href' => 'https://api.paypal.com/v1/payments/payment/PAY-8MD93335G6649645MKM2DDUY',
+										'rel' => 'parent_payment',
+										'method' => 'GET'
+									)
+								)
+							)
+						)
+					)
+				)
+			),
+			'links' => array(
+				0 => array(
+					'href' => 'https://api.paypal.com/v1/payments/payment/PAY-8MD93335G6649645MKM2DDUY',
+					'rel' => 'self',
+					'method' => 'GET'
+				)
+			)
+		);
+		
+		$HttpSocketResponse = new stdClass();
+		$HttpSocketResponse->body = json_encode($expectedResponse);
+		$HttpSocketResponse->code = 200;
+		
+		$this->Paypal->HttpSocket->expects($this->once())
+			->method('request')
+			->with($this->equalTo($mockRequest))
+			->will($this->returnValue($HttpSocketResponse));
+		
+		$result = $this->Paypal->chargeStoredCard($cardPayment);
+		
+		$this->assertEqual($expectedResponse, $result);
+	}
+	
+/**
+ * testChargeStoredCardHandleError
+ *
+ * @return void
+ * @author Rob Mcvey
+ * @expectedException PaypalException
+ * @expectedExceptionMessage An internal service error has occurred
+ **/
+	public function testChargeStoredCardHandleError() {
+		$this->Paypal = new Paypal(array(
+			'sandboxMode' => true,
+			'nvpUsername' => 'foo',
+			'nvpPassword' => 'bar',
+			'nvpSignature' => 'foobar',
+			'oAuthClientId' => 'ASPu1-BDs2U35hVZkITi2WzX98cbNahkSeoxsuvfmrXNTz-gA5EGslxk0fAFU',
+			'oAuthSecret' => 'EO6RKHYQ14G-U9Smbz4H8fUIY9Mf846URRNdYNNXQ2wghxC',
+		));
+		
+		$expectedTokenResponse = array(
+			'scope' => 'openid https://api.paypal.com/v1/payments/.* https://api.paypal.com/v1/vault/credit-card/.* https://api.paypal.com/v1/vault/credit-card',
+			'access_token' => 'Zr-NlxdL6u1kQNUNnG7SYUjsqFIk2OCI7wxGStzPEO8',
+			'token_type' => 'Bearer',
+			'app_id' => 'APP-7KR335967N254033H',
+			'expires_in' => 28800
+		);
+		
+		// Mock the HttpSocket classs
+		$this->Paypal->HttpSocket = $this->getMock('HttpSocket');
+		
+		// Mock the HttpSocket configAuth method
+		$this->Paypal->HttpSocket->expects($this->once())
+			->method('configAuth')
+			->with('Basic', 'ASPu1-BDs2U35hVZkITi2WzX98cbNahkSeoxsuvfmrXNTz-gA5EGslxk0fAFU', 'EO6RKHYQ14G-U9Smbz4H8fUIY9Mf846URRNdYNNXQ2wghxC');
+		
+		// Mock the HttpSocket post method
+		$expectedTokenResponse = json_encode($expectedTokenResponse);
+		
+		$HttpSocketResponse = new stdClass();
+		$HttpSocketResponse->body = $expectedTokenResponse;
+		$HttpSocketResponse->code = 200;
+		
+		$this->Paypal->HttpSocket->expects($this->once())
+			->method('post')
+			->with('https://api.sandbox.paypal.com/v1/oauth2/token', array(
+				"grant_type" => "client_credentials"
+			))
+			->will($this->returnValue($HttpSocketResponse));
+		
+		// Mock the HttpSocket reset method
+		$this->Paypal->HttpSocket->expects($this->once())
+			->method('reset');
+			
+		// Expected JSON to be posted to paypal
+		$expectedJSON = '{"intent":"sale","redirect_urls":{"return_url":"http:\/\/copify.com\/return","cancel_url":"http:\/\/copify.com\/cancel"},"payer":{"payment_method":"credit_card","funding_instruments":[{"credit_card_token":{"credit_card_id":"CARD-39N78604CK9041431KM2DDC2","payer_id":"186"}}]},"transactions":[{"amount":{"total":"0.60","currency":"GBP","details":{"subtotal":"0.50","tax":"0.10","shipping":"0.00"}},"description":"This is test payment to copify"}]}';	
+
+		// Our transaction, we'll build this from the users data
+		$cardPayment = array(
+			'intent' => 'sale',
+			"redirect_urls" => array(
+				"return_url" => "http://copify.com/return",
+				"cancel_url" => "http://copify.com/cancel"
+			),
+			'payer' => array(
+				'payment_method' => 'credit_card',
+				'funding_instruments' => array(
+					0 => array(
+						'credit_card_token' => array(
+							'credit_card_id' => 'CARD-39N78604CK9041431KM2DDC2',
+							'payer_id' => '186'
+						)
+					)
+				)
+			),
+			'transactions' => array(
+				0 => array(
+					'amount' => array(
+						'total' => '0.60',
+						'currency' => 'GBP',
+						"details" => array(
+							"subtotal" => "0.50",
+							"tax" => "0.10",
+							"shipping" => "0.00"
+				        )
+					),
+					'description' => 'This is test payment to copify'
+				)
+			)
+		);
+		
+		// The request we expect to send to paypal
+		$mockRequest = array(
+			'method' => 'POST',
+			'header' => array(
+				'Content-Type' => 'application/json',
+				'Authorization' => 'Bearer Zr-NlxdL6u1kQNUNnG7SYUjsqFIk2OCI7wxGStzPEO8'
+			),
+			'uri' => 'https://api.sandbox.paypal.com/v1/payments/payment',
+			'body' => $expectedJSON
+		);
+		
+		$response = array(
+			'name' => 'INTERNAL_SERVICE_ERROR',
+			'message' => 'An internal service error has occurred',
+			'information_link' => 'https://developer.paypal.com/webapps/developer/docs/api/#INTERNAL_SERVICE_ERROR',
+			'debug_id' => '1fe3ea968af59'
+		);
+		
+		$HttpSocketResponse = new stdClass();
+		$HttpSocketResponse->body = json_encode($response);
+		$HttpSocketResponse->code = 500;
+		
+		$this->Paypal->HttpSocket->expects($this->once())
+			->method('request')
+			->with($this->equalTo($mockRequest))
+			->will($this->returnValue($HttpSocketResponse));
+		
+		$result = $this->Paypal->chargeStoredCard($cardPayment);
+	}
+	
+/**
+ * testChargeStoredCardHandleErrorNoMessage
+ *
+ * @return void
+ * @author Rob Mcvey
+ * @expectedException PaypalException
+ * @expectedExceptionMessage There was an problem communicating with the payment gateway
+ **/
+	public function testChargeStoredCardHandleErrorNoMessage() {
+		$this->Paypal = new Paypal(array(
+			'sandboxMode' => true,
+			'nvpUsername' => 'foo',
+			'nvpPassword' => 'bar',
+			'nvpSignature' => 'foobar',
+			'oAuthClientId' => '1ROu-BDs2U35hVZkITi2WzX98cbNahkSeoxsuvfmrXNTz-gA5EGslxk0fAFU',
+			'oAuthSecret' => 'EO6RKHYQ14G-U9Smbz4H8fUIY9Mf846URRNdYNNXQ2wghxC',
+		));
+
+		$expectedTokenResponse = array(
+			'scope' => 'openid https://api.paypal.com/v1/payments/.* https://api.paypal.com/v1/vault/credit-card/.* https://api.paypal.com/v1/vault/credit-card',
+			'access_token' => 'Zr-NlxdL6u1kQNUNnG7SYUjsqFIk2OCI7wxGStzPEO8',
+			'token_type' => 'Bearer',
+			'app_id' => 'APP-7KR335967N254033H',
+			'expires_in' => 28800
+		);
+
+		// Mock the HttpSocket classs
+		$this->Paypal->HttpSocket = $this->getMock('HttpSocket');
+
+		// Mock the HttpSocket configAuth method
+		$this->Paypal->HttpSocket->expects($this->once())
+			->method('configAuth')
+			->with('Basic', '1ROu-BDs2U35hVZkITi2WzX98cbNahkSeoxsuvfmrXNTz-gA5EGslxk0fAFU', 'EO6RKHYQ14G-U9Smbz4H8fUIY9Mf846URRNdYNNXQ2wghxC');
+
+		// Mock the HttpSocket post method
+		$expectedTokenResponse = json_encode($expectedTokenResponse);
+
+		$HttpSocketResponse = new stdClass();
+		$HttpSocketResponse->body = $expectedTokenResponse;
+		$HttpSocketResponse->code = 200;
+
+		$this->Paypal->HttpSocket->expects($this->once())
+			->method('post')
+			->with('https://api.sandbox.paypal.com/v1/oauth2/token', array(
+				"grant_type" => "client_credentials"
+			))
+			->will($this->returnValue($HttpSocketResponse));
+
+		// Mock the HttpSocket reset method
+		$this->Paypal->HttpSocket->expects($this->once())
+			->method('reset');
+
+		// Expected JSON to be posted to paypal
+		$expectedJSON = '{"intent":"sale","redirect_urls":{"return_url":"http:\/\/copify.com\/return","cancel_url":"http:\/\/copify.com\/cancel"},"payer":{"payment_method":"credit_card","funding_instruments":[{"credit_card_token":{"credit_card_id":"CARD-39N78604CK9041431KM2DDC2","payer_id":"186"}}]},"transactions":[{"amount":{"total":"0.60","currency":"GBP","details":{"subtotal":"0.50","tax":"0.10","shipping":"0.00"}},"description":"This is test payment to copify"}]}';	
+
+		// Our transaction, we'll build this from the users data
+		$cardPayment = array(
+			'intent' => 'sale',
+			"redirect_urls" => array(
+				"return_url" => "http://copify.com/return",
+				"cancel_url" => "http://copify.com/cancel"
+			),
+			'payer' => array(
+				'payment_method' => 'credit_card',
+				'funding_instruments' => array(
+					0 => array(
+						'credit_card_token' => array(
+							'credit_card_id' => 'CARD-39N78604CK9041431KM2DDC2',
+							'payer_id' => '186'
+						)
+					)
+				)
+			),
+			'transactions' => array(
+				0 => array(
+					'amount' => array(
+						'total' => '0.60',
+						'currency' => 'GBP',
+						"details" => array(
+							"subtotal" => "0.50",
+							"tax" => "0.10",
+							"shipping" => "0.00"
+				        )
+					),
+					'description' => 'This is test payment to copify'
+				)
+			)
+		);
+
+		// The request we expect to send to paypal
+		$mockRequest = array(
+			'method' => 'POST',
+			'header' => array(
+				'Content-Type' => 'application/json',
+				'Authorization' => 'Bearer Zr-NlxdL6u1kQNUNnG7SYUjsqFIk2OCI7wxGStzPEO8'
+			),
+			'uri' => 'https://api.sandbox.paypal.com/v1/payments/payment',
+			'body' => $expectedJSON
+		);
+
+		$response = array(
+			'name' => 'NOT_FOUND',
+			//'message' => 'An internal service error has occurred',
+			'information_link' => 'https://developer.paypal.com/webapps/developer/docs/api/#INTERNAL_SERVICE_ERROR',
+			'debug_id' => '1fe3ea968af59'
+		);
+
+		$HttpSocketResponse = new stdClass();
+		$HttpSocketResponse->body = json_encode($response);
+		$HttpSocketResponse->code = 500;
+
+		$this->Paypal->HttpSocket->expects($this->once())
+			->method('request')
+			->with($this->equalTo($mockRequest))
+			->will($this->returnValue($HttpSocketResponse));
+
+		$result = $this->Paypal->chargeStoredCard($cardPayment);
+	}
+	
 }
