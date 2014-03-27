@@ -277,8 +277,8 @@ $this->Paypal = new Paypal(array(
 	'nvpUsername' => '{username}',
 	'nvpPassword' => '{password}',
 	'nvpSignature' => '{signature}',
-	'adaptiveAppID' => 'APP-80W284485P519543T',
-	'adaptiveUserID' => '5783770_biz_api1.gmail.com'
+	'adaptiveAppID' => '{adaptive app id}',
+	'adaptiveUserID' => '{adaptive user id}'
 ));
 ```
 
