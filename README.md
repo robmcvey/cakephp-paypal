@@ -96,7 +96,7 @@ $order = array(
 
 ### GetExpressCheckoutDetails
 
-Once the customer has returned to your site (see `return` URL above) you can request their details with the token returned from the `SetExpressCheckout` method.
+Once the customer has returned to your site (see `return` URL above) you can request their details with the token returned from the `setExpressCheckout` method.
 
 ```php
 try {
@@ -108,7 +108,7 @@ try {
 
 ### DoExpressCheckoutPayment
 
-Complete the transaction using the same order details. The `$token` and `$payerId` will be returned from the `SetExpressCheckout` method.
+Complete the transaction using the same order details. The `$token` and `$payerId` will be returned from the `setExpressCheckout` method.
 
 ```php
 $order = array(
@@ -167,7 +167,7 @@ try {
 
 ### RefundTransaction
 
-Refund a transction. Transactions can only be refunded up to 60 days after the completion date.
+Refund a transaction. Transactions can only be refunded up to 60 days after the completion date.
 
 ```php
 $refund = array(
@@ -205,6 +205,8 @@ $this->Paypal = new Paypal(array(
 
 ### Store card in vault
 
+You can store a customer's card in the vault, in return for a token which can be used for future transactions.
+
 ```php
 $creditCard = array(
 	'payer_id' => 186,
@@ -227,6 +229,8 @@ try {
 ```
 
 ### Charge a stored card
+
+Once a card is stored in the vault, you can make a charge(s) on that card using the token issued when it was first stored. 
 
 ```php
 $cardPayment = array(
