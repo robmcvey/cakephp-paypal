@@ -285,7 +285,6 @@ class Paypal {
  * @author Rob Mcvey
  **/
     public function setExpressCheckout($order) {
-
         try {
             // Build the NVPs
             $nvps = $this->buildExpressCheckoutNvp($order);

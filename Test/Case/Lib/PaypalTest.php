@@ -216,7 +216,6 @@ class PaypalTestCase extends CakeTestCase {
  * @expectedExceptionMessage The billing agreement is disabled or inactive.
  */
 	public function testDoExpressCheckoutPaymentException() {
-
 		// Setup Paypal sandbox
 		$this->Paypal = new Paypal(array(
 			'sandboxMode' => true,
@@ -548,7 +547,7 @@ class PaypalTestCase extends CakeTestCase {
  *
  * @author Chris Green
  * @expectedException PaypalRedirectException
- * @expectedExceptionMessage This transaction couldn't be completed. Redirecting to payment gateway
+ * @expectedExceptionMessage https://www.paypal.com/cgi-bin/webscr?cmd=_express-checkout&token=EC-482053995J417352W
  */
 	public function testDoExpressCheckoutPaymentRedirectExcpetion() {
 
