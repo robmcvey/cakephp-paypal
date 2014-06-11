@@ -138,7 +138,7 @@ $order = array(
 try {
 	$this->Paypal->doExpressCheckoutPayment($order, $token, $payerId);	
 } catch (PaypalRedirectException $e) {
-	// $e->getMessage();
+	$this->redirect($e->getMessage());
 } catch (Exception $e) {
 	// $e->getMessage();
 }	
