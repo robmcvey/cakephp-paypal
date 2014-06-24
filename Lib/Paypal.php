@@ -409,7 +409,8 @@ class Paypal {
             }
             else if ($parsed['ACK'] == "Failure" && isset($parsed['L_LONGMESSAGE0']))  {
                 if (in_array($parsed['L_ERRORCODE0'], $this->redirectErrors) && isset($parsed['TOKEN'])) {
-                    throw new PaypalRedirectException($this->getErrorMessage($parsed));
+					// We can catch an exception that requires a redirect back to paypal
+                    throw new PaypalRedirectException($this->expressCheckoutUrl($token));
                 }
                 throw new PaypalException($this->getErrorMessage($parsed));
             }

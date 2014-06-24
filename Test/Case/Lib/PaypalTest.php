@@ -547,10 +547,9 @@ class PaypalTestCase extends CakeTestCase {
  *
  * @author Chris Green
  * @expectedException PaypalRedirectException
- * @expectedExceptionMessage https://www.paypal.com/cgi-bin/webscr?cmd=_express-checkout&token=EC-482053995J417352W
+ * @expectedExceptionMessage https://www.sandbox.paypal.com/webscr?cmd=_express-checkout&token=EC-482053995J417352W
  */
 	public function testDoExpressCheckoutPaymentRedirectExcpetion() {
-
 		// Setup Paypal sandbox
 		$this->Paypal = new Paypal(array(
 			'sandboxMode' => true,
@@ -558,7 +557,6 @@ class PaypalTestCase extends CakeTestCase {
 			'nvpPassword' => 'bar',
 			'nvpSignature' => 'foobar'
 		));
-
 		// Create order
 		$order = array(
 			'description' => 'Your purchase with Acme clothes store',
