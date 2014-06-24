@@ -5,6 +5,7 @@ php:
   - 5.5
 
 before_script:
+  - pear install phpunit/PHPUnit-3.7.32
   - mysql -e 'CREATE DATABASE cakephp_test;'
   - echo -e "Host github.com\n\tStrictHostKeyChecking no\n" >> ~/.ssh/config
   - git clone --depth 2 https://github.com/cakephp/cakephp.git
