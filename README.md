@@ -40,7 +40,7 @@ git clone -b master git://github.com/robmcvey/cakephp-paypal.git Paypal
 
 Make sure the plugin is loaded in `app/Config/bootstrap.php`.
 
-```
+```php
 CakePlugin::load('Paypal');
 ```
 
@@ -109,6 +109,8 @@ try {
 ### DoExpressCheckoutPayment
 
 Complete the transaction using the same order details. The `$token` and `$payerId` will be returned from the `setExpressCheckout` method.
+
+This method may throw a `PaypalRedirectException` if a user's funding method (the credit card or bank account associated with their PayPal account) needs updating. The exception message will contain a URL to redirect the user to where they will be prompted to update their funding method.
 
 ```php
 $order = array(
