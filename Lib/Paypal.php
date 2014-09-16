@@ -303,13 +303,18 @@ class Paypal {
             $parsed = $this->parseClassicApiResponse($response);
 
             // Handle the resposne
-            if (isset($parsed['TOKEN']) && $parsed['ACK'] == "Success")  {
+            if (isset($parsed['TOKEN']) && preg_match("/^Success.*/", $parsed['ACK']))  {
+		if ($parsed['ACK'] !== "Success") {
+			// Transaction was processed with warnings
+			CakeLog::write(LOG_WARNING, "Warning by PayPal setExpressCheckout: ".$this->getErrorMessage($parsed));
+		}
                 return $this->expressCheckoutUrl($parsed['TOKEN']);
             }
             else if ($parsed['ACK'] == "Failure" && isset($parsed['L_LONGMESSAGE0']))  {
                 throw new PaypalException($this->getErrorMessage($parsed));
             }
             else {
+		CakeLog::write(LOG_ERROR, "Error by PayPal setExpressCheckout: ".$this->getErrorMessage($parsed));
                 throw new PaypalException(__d('paypal' , 'There was an error while connecting to Paypal'));
             }
         } catch (SocketException $e) {
