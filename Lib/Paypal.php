@@ -303,7 +303,7 @@ class Paypal {
             $parsed = $this->parseClassicApiResponse($response);
 
             // Handle the resposne
-            if (isset($parsed['TOKEN']) && $parsed['ACK'] == "Success")  {
+            if (isset($parsed['TOKEN']) && isset($parsed['ACK']) && in_array($parsed['ACK'], array('Success', 'SuccessWithWarning')))  {
                 return $this->expressCheckoutUrl($parsed['TOKEN']);
             }
             else if ($parsed['ACK'] == "Failure" && isset($parsed['L_LONGMESSAGE0']))  {
@@ -351,7 +351,7 @@ class Paypal {
             $parsed = $this->parseClassicApiResponse($response);
 
             // Handle the resposne
-            if (isset($parsed['TOKEN']) && $parsed['ACK'] == "Success")  {
+            if (isset($parsed['TOKEN']) && isset($parsed['ACK']) && in_array($parsed['ACK'], array('Success', 'SuccessWithWarning')))  {
                 return $parsed;
             }
             else if ($parsed['ACK'] == "Failure" && isset($parsed['L_LONGMESSAGE0']))  {
@@ -366,60 +366,60 @@ class Paypal {
 	}
 
 /**
- * DoExpressCheckoutPayment
- * The DoExpressCheckoutPayment API operation completes an Express Checkout transaction
- *
- * @param array $order Takes an array order (See tests for supported fields).
- * @param string $token The token for this purchase (from Paypal, see SetExpressCheckout)
- * @param string $payerId The ID of the Paypal user making the purchase
- * @return array Details of the completed transaction
- * @author Rob Mcvey
- **/
+* DoExpressCheckoutPayment
+* The DoExpressCheckoutPayment API operation completes an Express Checkout transaction
+*
+* @param array $order Takes an array order (See tests for supported fields).
+* @param string $token The token for this purchase (from Paypal, see SetExpressCheckout)
+* @param string $payerId The ID of the Paypal user making the purchase
+* @return array Details of the completed transaction
+* @author Rob Mcvey
+**/
 	public function doExpressCheckoutPayment($order, $token , $payerId) {
-        try {
-            // Build the NVPs
-            $nvps = $this->buildExpressCheckoutNvp($order);
+		try {
+			// Build the NVPs
+			$nvps = $this->buildExpressCheckoutNvp($order);
 
-            // When we call DoExpressCheckoutPayment, there are 3 NVPs that are different;
-            $keysToAdd = array(
-                'METHOD' => 'DoExpressCheckoutPayment',
-                'TOKEN' => $token,
-                'PAYERID' => $payerId,
-            );
+			// When we call DoExpressCheckoutPayment, there are 3 NVPs that are different;
+			$keysToAdd = array(
+				'METHOD' => 'DoExpressCheckoutPayment',
+				'TOKEN' => $token,
+				'PAYERID' => $payerId,
+			);
 
-            // Add/overite, we now habe our final NVPs
-            $finalNvps = array_merge($nvps, $keysToAdd);
+			// Add/overite, we now habe our final NVPs
+			$finalNvps = array_merge($nvps, $keysToAdd);
 
-            // HttpSocket
-            if (!$this->HttpSocket) {
-                $this->HttpSocket = new HttpSocket();
-            }
-            // Classic API endpoint
-            $endPoint = $this->getClassicEndpoint();
+			// HttpSocket
+			if (!$this->HttpSocket) {
+				$this->HttpSocket = new HttpSocket();
+			}
+			// Classic API endpoint
+			$endPoint = $this->getClassicEndpoint();
 
-            // Make a Http request for a new token
-            $response = $this->HttpSocket->post($endPoint , $finalNvps);
+			// Make a Http request for a new token
+			$response = $this->HttpSocket->post($endPoint , $finalNvps);
 
-            // Parse the results
-            $parsed = $this->parseClassicApiResponse($response);
+			// Parse the results
+			$parsed = $this->parseClassicApiResponse($response);
 
-            // Handle the resposne
-            if (isset($parsed['TOKEN']) && $parsed['ACK'] == "Success")  {
-                return $parsed;
-            }
-            else if ($parsed['ACK'] == "Failure" && isset($parsed['L_LONGMESSAGE0']))  {
-                if (in_array($parsed['L_ERRORCODE0'], $this->redirectErrors) && isset($parsed['TOKEN'])) {
+			// Handle the resposne
+			if (isset($parsed['TOKEN']) && isset($parsed['ACK']) && in_array($parsed['ACK'], array('Success', 'SuccessWithWarning')))  {
+				return $parsed;
+			}
+			else if ($parsed['ACK'] == "Failure" && isset($parsed['L_LONGMESSAGE0']))  {
+				if (in_array($parsed['L_ERRORCODE0'], $this->redirectErrors) && isset($parsed['TOKEN'])) {
 					// We can catch an exception that requires a redirect back to paypal
-                    throw new PaypalRedirectException($this->expressCheckoutUrl($token));
-                }
-                throw new PaypalException($this->getErrorMessage($parsed));
-            }
-            else {
-                throw new PaypalException(__d('paypal' , 'There was an error completing the payment'));
-            }
-        } catch (SocketException $e) {
-            throw new PaypalException(__d('paypal','There was a problem processing the transaction, please try again.'));
-        }
+					throw new PaypalRedirectException($this->expressCheckoutUrl($token));
+				}
+				throw new PaypalException($this->getErrorMessage($parsed));
+			}
+			else {
+				throw new PaypalException(__d('paypal' , 'There was an error completing the payment'));
+			}
+		} catch (SocketException $e) {
+			throw new PaypalException(__d('paypal','There was a problem processing the transaction, please try again.'));
+		}
 	}
 
 /**
