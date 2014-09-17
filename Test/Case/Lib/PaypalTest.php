@@ -774,6 +774,81 @@ class PaypalTestCase extends CakeTestCase {
 	}
 
 /**
+ * testSetExpressCheckoutSuccessWithWarning
+ *
+ * @return void
+ * @author Rob Mcvey
+ **/
+	public function testSetExpressCheckoutSuccessWithWarning() {
+		$this->Paypal = new Paypal(array(
+			'sandboxMode' => true,
+			'nvpUsername' => 'foo',
+			'nvpPassword' => 'bar',
+			'nvpSignature' => 'foobar'
+		));
+		$order = array(
+			'description' => 'Your purchase with Acme clothes store',
+			'currency' => 'GBP',
+			'return' => 'https://www.my-amazing-clothes-store.com/review-paypal.php',
+			'cancel' => 'https://www.my-amazing-clothes-store.com/checkout.php',
+			'custom' => 'bingbong',
+			'items' => array(
+				0 => array(
+					'name' => 'Blue shoes',
+					'description' => 'A pair of really great blue shoes',
+					'tax' => 2.00,
+					'shipping' => 0.00,
+					'subtotal' => 8.00,
+				),
+				1 => array(
+					'name' => 'Red trousers',
+					'description' => 'Tight pair of red pants, look good with a hat.',
+					'tax' => 2.00,
+					'shipping' => 2.00,
+					'subtotal' => 6.00
+				),
+			)
+		);
+		$expectedNvps = array(
+			'METHOD' => 'SetExpressCheckout',
+			'VERSION' => '104.0',
+			'PAYMENTREQUEST_0_PAYMENTACTION' => 'Sale',
+			'RETURNURL' => 'https://www.my-amazing-clothes-store.com/review-paypal.php',
+			'CANCELURL' => 'https://www.my-amazing-clothes-store.com/checkout.php',
+			'USER' => 'foo',
+			'PWD' => 'bar',
+			'SIGNATURE' => 'foobar',
+			'PAYMENTREQUEST_0_CURRENCYCODE' => 'GBP',
+			'PAYMENTREQUEST_0_ITEMAMT' => 14.00,
+			'PAYMENTREQUEST_0_SHIPPINGAMT' => 2.00,
+			'PAYMENTREQUEST_0_TAXAMT' => 4.00,
+			'PAYMENTREQUEST_0_AMT' => 20.00,
+			'PAYMENTREQUEST_0_DESC' => 'Your purchase with Acme clothes store',
+			'PAYMENTREQUEST_0_CUSTOM' => 'bingbong',
+			'L_PAYMENTREQUEST_0_NAME0' => 'Blue shoes',
+			'L_PAYMENTREQUEST_0_DESC0' => 'A pair of really great blue shoes',
+			'L_PAYMENTREQUEST_0_TAXAMT0' => 2.00,
+			'L_PAYMENTREQUEST_0_AMT0' => 8.00,
+			'L_PAYMENTREQUEST_0_QTY0' => 1,
+			'L_PAYMENTREQUEST_0_NAME1' => 'Red trousers',
+			'L_PAYMENTREQUEST_0_DESC1' => 'Tight pair of red pants, look good with a hat.',
+			'L_PAYMENTREQUEST_0_TAXAMT1' => 2.00,
+			'L_PAYMENTREQUEST_0_AMT1' => 6.00,
+			'L_PAYMENTREQUEST_0_QTY1' => 1,
+		);
+		$expectedEndpoint = 'https://api-3t.sandbox.paypal.com/nvp';
+		$mockResponse = 'TOKEN=EC%2d5PY500325X986371J&TIMESTAMP=2013%2d07%2d04T13%3a37%3a53Z&CORRELATIONID=845286d6c4caa&ACK=SuccessWithWarning&VERSION=104%2e0&BUILD=6680107';
+		$this->Paypal->HttpSocket = $this->getMock('HttpSocket');
+		$this->Paypal->HttpSocket->expects($this->once())
+			->method('post')
+			->with($this->equalTo($expectedEndpoint) , $this->equalTo($expectedNvps))
+			->will($this->returnValue($mockResponse));
+		$result = $this->Paypal->setExpressCheckout($order);
+		$expected = 'https://www.sandbox.paypal.com/webscr?cmd=_express-checkout&token=EC-5PY500325X986371J';
+		$this->assertEqual($expected , $result);
+	}
+
+/**
  * test getExpressCheckoutDetails
  *
  * @return void
