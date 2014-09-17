@@ -1672,7 +1672,7 @@ class PaypalTestCase extends CakeTestCase {
 		$expected = array(
 			'TIMESTAMP' => '2013-07-05T13:52:48Z',
 			'CORRELATIONID' => '5d7677126e0b4',
-			'ACK' => 'Success',
+			'ACK' => 'SuccessWithWarning',
 			'VERSION' => '104.0',
 			'BUILD' => '6680107',
 			'AMT' => '30.00',
