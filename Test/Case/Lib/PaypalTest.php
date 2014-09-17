@@ -1609,6 +1609,80 @@ class PaypalTestCase extends CakeTestCase {
 		);
 		$this->assertEqual($expected , $result);
 	}
+	
+/**
+ * testDoDirectPaymentSuccessWithWarning
+ *
+ * @return void
+ * @author Rob Mcvey
+ **/
+	public function testDoDirectPaymentSuccessWithWarning() {
+		$this->Paypal = new Paypal(array(
+			'sandboxMode' => true,
+			'nvpUsername' => 'foo',
+			'nvpPassword' => 'bar',
+			'nvpSignature' => 'foobar'
+		));
+		$payment = array(
+			'amount' => 30.00,
+			'card' => '4008 0687 0641 8697', // This is a sandbox CC
+			'expiry' => array(
+				'M' => '2',
+				'Y' => '2016',
+			),
+			'cvv' => '321',
+		);
+		// Mock the CakeRequest class
+		$this->Paypal->CakeRequest = $this->getMock('CakeRequest');
+		$this->Paypal->CakeRequest->expects($this->once())
+			->method('clientIp')
+			->will($this->returnValue("217.114.52.94"));
+
+		// Mock the HttpSocket class
+		$expectedEndpoint = 'https://api-3t.sandbox.paypal.com/nvp';
+		$mockResponse = 'TIMESTAMP=2013%2d07%2d05T13%3a52%3a48Z&CORRELATIONID=5d7677126e0b4&ACK=SuccessWithWarning&VERSION=104%2e0&BUILD=6680107&AMT=30%2e00&CURRENCYCODE=GBP&AVSCODE=X&CVV2MATCH=M&TRANSACTIONID=0XW09448VG556664J';
+		$expectedNvps = array(
+			'METHOD' => 'DoDirectPayment',
+			'VERSION' => '104.0',
+			'USER' => 'foo',
+			'PWD' => 'bar',
+			'SIGNATURE' => 'foobar',
+			'IPADDRESS' => '217.114.52.94',
+			'AMT' => 30.00,
+			'CURRENCYCODE' => 'GBP',
+			'RECURRING' => 'N',
+			'ACCT' => '4008068706418697', // This is a sandbox CC
+			'EXPDATE' => '022016',
+			'CVV2' => '321',
+			'FIRSTNAME' => '',
+			'LASTNAME' => '',
+			'STREET' => '',
+			'CITY' => '',
+			'STATE' => '',
+			'COUNTRYCODE' => '',
+			'ZIP' => ''
+		);
+		$this->Paypal->HttpSocket = $this->getMock('HttpSocket');
+		$this->Paypal->HttpSocket->expects($this->once())
+			->method('post')
+			->with($this->equalTo($expectedEndpoint) , $this->equalTo($expectedNvps))
+			->will($this->returnValue($mockResponse));
+
+		$result = $this->Paypal->doDirectPayment($payment);
+		$expected = array(
+			'TIMESTAMP' => '2013-07-05T13:52:48Z',
+			'CORRELATIONID' => '5d7677126e0b4',
+			'ACK' => 'Success',
+			'VERSION' => '104.0',
+			'BUILD' => '6680107',
+			'AMT' => '30.00',
+			'CURRENCYCODE' => 'GBP',
+			'AVSCODE' => 'X',
+			'CVV2MATCH' => 'M',
+			'TRANSACTIONID' => '0XW09448VG556664J'
+		);
+		$this->assertEqual($expected , $result);
+	}	
 
 /**
  * test formatDoDirectPaymentNvps

@@ -458,7 +458,7 @@ class Paypal {
 			throw new PaypalException(__d('paypal', 'There was a problem processing your card, please try again.'));
 		}
 	}
-	
+
 /**
  * RefundTransaction
  * The RefundTransaction API Operation enables you to refund a transaction that is less than 60 days old.
