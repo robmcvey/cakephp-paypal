@@ -1076,6 +1076,110 @@ class PaypalTestCase extends CakeTestCase {
 	}
 
 /**
+ * testDoExpressCheckoutPaymentSuccessWithWarning
+ *
+ * @return void
+ * @author Rob Mcvey
+ **/
+	public function testDoExpressCheckoutPaymentSuccessWithWarning() {
+		$this->Paypal = new Paypal(array(
+			'sandboxMode' => true,
+			'nvpUsername' => 'foo',
+			'nvpPassword' => 'bar',
+			'nvpSignature' => 'foobar'
+		));
+		$order = array(
+			'description' => 'Your purchase with Acme clothes store',
+			'currency' => 'GBP',
+			'return' => 'https://www.my-amazing-clothes-store.com/review-paypal.php',
+			'cancel' => 'https://www.my-amazing-clothes-store.com/checkout.php',
+			'custom' => 'bingbong',
+			'items' => array(
+				0 => array(
+					'name' => 'Blue shoes',
+					'description' => 'A pair of really great blue shoes',
+					'tax' => 2.00,
+					'shipping' => 0.00,
+					'subtotal' => 8.00,
+				),
+				1 => array(
+					'name' => 'Red trousers',
+					'description' => 'Tight pair of red pants, look good with a hat.',
+					'tax' => 2.00,
+					'shipping' => 2.00,
+					'subtotal' => 6.00
+				),
+			)
+		);
+		$token = 'EC-482053995J417352W';
+		$payerId = 'GSEK8P4ARYMYS';
+		$expectedEndpoint = 'https://api-3t.sandbox.paypal.com/nvp';
+		$mockResponse = 'TOKEN=EC%2d88C117816V738422U&SUCCESSPAGEREDIRECTREQUESTED=false&TIMESTAMP=2013%2d07%2d05T11%3a41%3a07Z&CORRELATIONID=a4821326a65c6&ACK=SuccessWithWarning&VERSION=104%2e0&BUILD=6680107&INSURANCEOPTIONSELECTED=false&SHIPPINGOPTIONISDEFAULT=false&PAYMENTINFO_0_TRANSACTIONID=5V948789BD843205H&PAYMENTINFO_0_TRANSACTIONTYPE=cart&PAYMENTINFO_0_PAYMENTTYPE=instant&PAYMENTINFO_0_ORDERTIME=2013%2d07%2d05T11%3a41%3a06Z&PAYMENTINFO_0_AMT=20%2e00&PAYMENTINFO_0_FEEAMT=0%2e88&PAYMENTINFO_0_TAXAMT=4%2e00&PAYMENTINFO_0_CURRENCYCODE=GBP&PAYMENTINFO_0_PAYMENTSTATUS=Completed&PAYMENTINFO_0_PENDINGREASON=None&PAYMENTINFO_0_REASONCODE=None&PAYMENTINFO_0_PROTECTIONELIGIBILITY=Eligible&PAYMENTINFO_0_PROTECTIONELIGIBILITYTYPE=ItemNotReceivedEligible%2cUnauthorizedPaymentEligible&PAYMENTINFO_0_SECUREMERCHANTACCOUNTID=AD4VU2GRDM9EU&PAYMENTINFO_0_ERRORCODE=0&PAYMENTINFO_0_ACK=Success';
+		$expectedNvps = array(
+			'METHOD' => 'DoExpressCheckoutPayment',
+			'VERSION' => '104.0',
+			'PAYMENTREQUEST_0_PAYMENTACTION' => 'Sale',
+			'USER' => 'foo',
+			'PWD' => 'bar',
+			'SIGNATURE' => 'foobar',
+			'RETURNURL' => 'https://www.my-amazing-clothes-store.com/review-paypal.php',
+			'CANCELURL' => 'https://www.my-amazing-clothes-store.com/checkout.php',
+			'PAYMENTREQUEST_0_CURRENCYCODE' => 'GBP',
+			'PAYMENTREQUEST_0_DESC' => 'Your purchase with Acme clothes store',
+			'PAYMENTREQUEST_0_CUSTOM' => 'bingbong',
+			'PAYMENTREQUEST_0_ITEMAMT' => (float) 14,
+			'PAYMENTREQUEST_0_SHIPPINGAMT' => (float) 2,
+			'PAYMENTREQUEST_0_TAXAMT' => (float) 4,
+			'PAYMENTREQUEST_0_AMT' => (float) 20,
+			'L_PAYMENTREQUEST_0_NAME0' => 'Blue shoes',
+			'L_PAYMENTREQUEST_0_DESC0' => 'A pair of really great blue shoes',
+			'L_PAYMENTREQUEST_0_TAXAMT0' => (float) 2,
+			'L_PAYMENTREQUEST_0_AMT0' => (float) 8,
+			'L_PAYMENTREQUEST_0_QTY0' => (int) 1,
+			'L_PAYMENTREQUEST_0_NAME1' => 'Red trousers',
+			'L_PAYMENTREQUEST_0_DESC1' => 'Tight pair of red pants, look good with a hat.',
+			'L_PAYMENTREQUEST_0_TAXAMT1' => (float) 2,
+			'L_PAYMENTREQUEST_0_AMT1' => (float) 6,
+			'L_PAYMENTREQUEST_0_QTY1' => (int) 1,
+			'TOKEN' => $token,
+			'PAYERID' => $payerId
+		);
+		$this->Paypal->HttpSocket = $this->getMock('HttpSocket');
+		$this->Paypal->HttpSocket->expects($this->once())
+			->method('post')
+			->with($this->equalTo($expectedEndpoint) , $this->equalTo($expectedNvps))
+			->will($this->returnValue($mockResponse));
+		$expected = array(
+			'TOKEN' => $token,
+			'SUCCESSPAGEREDIRECTREQUESTED' => 'false',
+			'TIMESTAMP' => '2013-07-05T11:41:07Z',
+			'CORRELATIONID' => 'a4821326a65c6',
+			'ACK' => 'Success',
+			'VERSION' => '104.0',
+			'BUILD' => '6680107',
+			'INSURANCEOPTIONSELECTED' => 'false',
+			'SHIPPINGOPTIONISDEFAULT' => 'false',
+			'PAYMENTINFO_0_TRANSACTIONID' => '5V948789BD843205H',
+			'PAYMENTINFO_0_TRANSACTIONTYPE' => 'cart',
+			'PAYMENTINFO_0_PAYMENTTYPE' => 'instant',
+			'PAYMENTINFO_0_ORDERTIME' => '2013-07-05T11:41:06Z',
+			'PAYMENTINFO_0_AMT' => '20.00',
+			'PAYMENTINFO_0_FEEAMT' => '0.88',
+			'PAYMENTINFO_0_TAXAMT' => '4.00',
+			'PAYMENTINFO_0_CURRENCYCODE' => 'GBP',
+			'PAYMENTINFO_0_PAYMENTSTATUS' => 'Completed',
+			'PAYMENTINFO_0_PENDINGREASON' => 'None',
+			'PAYMENTINFO_0_REASONCODE' => 'None',
+			'PAYMENTINFO_0_PROTECTIONELIGIBILITY' => 'Eligible',
+			'PAYMENTINFO_0_PROTECTIONELIGIBILITYTYPE' => 'ItemNotReceivedEligible,UnauthorizedPaymentEligible',
+			'PAYMENTINFO_0_SECUREMERCHANTACCOUNTID' => 'AD4VU2GRDM9EU',
+			'PAYMENTINFO_0_ERRORCODE' => '0',
+			'PAYMENTINFO_0_ACK' => 'Success'
+		);
+		$result = $this->Paypal->doExpressCheckoutPayment($order , $token , $payerId);
+	}	
+
+/**
  * test parseClassicApiResponse
  *
  * @return void
