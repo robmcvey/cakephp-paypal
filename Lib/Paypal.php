@@ -329,7 +329,7 @@ class Paypal {
 	public function getExpressCheckoutDetails($token) {
         try {
             // Build the NVPs (Named value pairs)
-            $nvps = array(
+           	$nvps = array(
                 'METHOD' => 'GetExpressCheckoutDetails' ,
                 'VERSION' => $this->paypalClassicApiVersion,
                 'TOKEN' => $token,
@@ -431,32 +431,32 @@ class Paypal {
  * @author Rob Mcvey
  **/
 	public function doDirectPayment($payment) {
-        try {
+		try {
 			// Build NVPs
-            $nvps = $this->formatDoDirectPaymentNvps($payment);
-            // HttpSocket
-            if (!$this->HttpSocket) {
-                $this->HttpSocket = new HttpSocket();
-            }
-            // Classic API endpoint
-            $endPoint = $this->getClassicEndpoint();
-            // Make a Http request for a new token
-            $response = $this->HttpSocket->post($endPoint , $nvps);
-            // Parse the results
-            $parsed = $this->parseClassicApiResponse($response);
-            // Handle the resposne
-            if (isset($parsed['ACK']) && $parsed['ACK'] == "Success")  {
-                return $parsed;
-            }
-            else if ($parsed['ACK'] == "Failure" && isset($parsed['L_LONGMESSAGE0']))  {
-                throw new PaypalException($this->getErrorMessage($parsed));
-            }
-            else {
-                throw new PaypalException(__d('paypal' , 'There was an error processing the card payment'));
-            }
-        } catch (SocketException $e) {
-            throw new PaypalException(__d('paypal', 'There was a problem processing your card, please try again.'));
-        }
+			$nvps = $this->formatDoDirectPaymentNvps($payment);
+			// HttpSocket
+			if (!$this->HttpSocket) {
+				$this->HttpSocket = new HttpSocket();
+			}
+			// Classic API endpoint
+			$endPoint = $this->getClassicEndpoint();
+			// Make a Http request for a new token
+			$response = $this->HttpSocket->post($endPoint , $nvps);
+			// Parse the results
+			$parsed = $this->parseClassicApiResponse($response);
+			// Handle the resposne
+			if (isset($parsed['ACK']) && $parsed['ACK'] == "Success")  {
+				return $parsed;
+			}
+			else if ($parsed['ACK'] == "Failure" && isset($parsed['L_LONGMESSAGE0']))  {
+				throw new PaypalException($this->getErrorMessage($parsed));
+			}
+			else {
+				throw new PaypalException(__d('paypal' , 'There was an error processing the card payment'));
+			}
+		} catch (SocketException $e) {
+			throw new PaypalException(__d('paypal', 'There was a problem processing your card, please try again.'));
+		}
 	}
 	
 /**
@@ -468,7 +468,7 @@ class Paypal {
  * @author James Mikkelson
 **/
 	public function refundTransaction($refund) {
-        try {
+		try {
 			// Build NVPs
 			$nvps = $this->formatRefundTransactionNvps($refund);
 			// HttpSocket
