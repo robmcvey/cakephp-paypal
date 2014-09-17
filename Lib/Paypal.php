@@ -445,7 +445,7 @@ class Paypal {
 			// Parse the results
 			$parsed = $this->parseClassicApiResponse($response);
 			// Handle the resposne
-			if (isset($parsed['ACK']) && $parsed['ACK'] == "Success")  {
+			if (isset($parsed['ACK']) && isset($parsed['ACK']) && in_array($parsed['ACK'], array('Success', 'SuccessWithWarning')))  {
 				return $parsed;
 			}
 			else if ($parsed['ACK'] == "Failure" && isset($parsed['L_LONGMESSAGE0']))  {
