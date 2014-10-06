@@ -1045,7 +1045,7 @@ class PaypalTestCase extends CakeTestCase {
 		$result = $this->Paypal->getExpressCheckoutDetails($token);
 		$this->assertEqual($expected , $result);
 	}
-	
+
 /**
  * testGetExpressCheckoutDetailsSuccessWithWarning
  *
