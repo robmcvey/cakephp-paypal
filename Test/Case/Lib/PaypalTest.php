@@ -774,6 +774,81 @@ class PaypalTestCase extends CakeTestCase {
 	}
 
 /**
+ * testSetExpressCheckoutReallyLooooooooooongDescription
+ *
+ * @return void
+ * @author Rob Mcvey
+ **/
+	public function testSetExpressCheckoutReallyLooooooooooongDescription() {
+		$this->Paypal = new Paypal(array(
+			'sandboxMode' => true,
+			'nvpUsername' => 'foo',
+			'nvpPassword' => 'bar',
+			'nvpSignature' => 'foobar'
+		));
+		$order = array(
+			'description' => 'Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industrys standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.',
+			'currency' => 'GBP',
+			'return' => 'https://www.my-amazing-clothes-store.com/review-paypal.php',
+			'cancel' => 'https://www.my-amazing-clothes-store.com/checkout.php',
+			'custom' => 'bingbong',
+			'items' => array(
+				0 => array(
+					'name' => 'Blue shoes',
+					'description' => 'A pair of really great blue shoes',
+					'tax' => 2.00,
+					'shipping' => 0.00,
+					'subtotal' => 8.00,
+				),
+				1 => array(
+					'name' => 'Red trousers',
+					'description' => 'Tight pair of red pants, look good with a hat.',
+					'tax' => 2.00,
+					'shipping' => 2.00,
+					'subtotal' => 6.00
+				),
+			)
+		);
+		$expectedNvps = array(
+			'METHOD' => 'SetExpressCheckout',
+			'VERSION' => '104.0',
+			'PAYMENTREQUEST_0_PAYMENTACTION' => 'Sale',
+			'RETURNURL' => 'https://www.my-amazing-clothes-store.com/review-paypal.php',
+			'CANCELURL' => 'https://www.my-amazing-clothes-store.com/checkout.php',
+			'USER' => 'foo',
+			'PWD' => 'bar',
+			'SIGNATURE' => 'foobar',
+			'PAYMENTREQUEST_0_CURRENCYCODE' => 'GBP',
+			'PAYMENTREQUEST_0_ITEMAMT' => 14.00,
+			'PAYMENTREQUEST_0_SHIPPINGAMT' => 2.00,
+			'PAYMENTREQUEST_0_TAXAMT' => 4.00,
+			'PAYMENTREQUEST_0_AMT' => 20.00,
+			'PAYMENTREQUEST_0_DESC' => 'Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industrys standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.',
+			'PAYMENTREQUEST_0_CUSTOM' => 'bingbong',
+			'L_PAYMENTREQUEST_0_NAME0' => 'Blue shoes',
+			'L_PAYMENTREQUEST_0_DESC0' => 'A pair of really great blue shoes',
+			'L_PAYMENTREQUEST_0_TAXAMT0' => 2.00,
+			'L_PAYMENTREQUEST_0_AMT0' => 8.00,
+			'L_PAYMENTREQUEST_0_QTY0' => 1,
+			'L_PAYMENTREQUEST_0_NAME1' => 'Red trousers',
+			'L_PAYMENTREQUEST_0_DESC1' => 'Tight pair of red pants, look good with a hat.',
+			'L_PAYMENTREQUEST_0_TAXAMT1' => 2.00,
+			'L_PAYMENTREQUEST_0_AMT1' => 6.00,
+			'L_PAYMENTREQUEST_0_QTY1' => 1,
+		);
+		$expectedEndpoint = 'https://api-3t.sandbox.paypal.com/nvp';
+		$mockResponse = 'TOKEN=EC%2d4BK13478KV440010T&TIMESTAMP=2014%2d10%2d06T12%3a26%3a14Z&CORRELATIONID=da4757b099f16&ACK=SuccessWithWarning&VERSION=104%2e0&BUILD=13154493&L_ERRORCODE0=10433&L_SHORTMESSAGE0=Transaction%20refused%20because%20of%20an%20invalid%20argument%2e%20See%20additional%20error%20messages%20for%20details%2e&L_LONGMESSAGE0=Value%20of%20OrderDescription%20element%20has%20been%20truncated%2e&L_SEVERITYCODE0=Warning';
+		$this->Paypal->HttpSocket = $this->getMock('HttpSocket');
+		$this->Paypal->HttpSocket->expects($this->once())
+			->method('post')
+			->with($this->equalTo($expectedEndpoint) , $this->equalTo($expectedNvps))
+			->will($this->returnValue($mockResponse));
+		$result = $this->Paypal->setExpressCheckout($order);
+		$expected = 'https://www.sandbox.paypal.com/webscr?cmd=_express-checkout&token=EC-4BK13478KV440010T';
+		$this->assertEqual($expected , $result);
+	}
+
+/**
  * testSetExpressCheckoutSuccessWithWarning
  *
  * @return void
