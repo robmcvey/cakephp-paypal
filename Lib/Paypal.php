@@ -813,11 +813,14 @@ class Paypal {
 				return $nvps;
 			}
 			foreach ($order['items'] as $m => $item) {
+				if (!isset($item['qty'])) {
+					$item['qty'] = 1;
+				}
 				$nvps["L_PAYMENTREQUEST_0_NAME$m"] = $item['name'];
 				$nvps["L_PAYMENTREQUEST_0_DESC$m"] = $item['description'];
 				$nvps["L_PAYMENTREQUEST_0_TAXAMT$m"] = $item['tax'];
 				$nvps["L_PAYMENTREQUEST_0_AMT$m"] = $item['subtotal'];
-				$nvps["L_PAYMENTREQUEST_0_QTY$m"] = 1;
+				$nvps["L_PAYMENTREQUEST_0_QTY$m"] = $item['qty'];
 			}
 		}
 		return $nvps;
