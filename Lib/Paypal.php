@@ -800,28 +800,40 @@ class Paypal {
 		}
 		// Add up each item and calculate totals
 		if (isset($order['items']) && is_array($order['items'])) {
-			$items_subtotal = array_sum(Hash::extract($order , 'items.{n}.subtotal'));
-			$items_shipping = array_sum(Hash::extract($order , 'items.{n}.shipping'));
-			$items_tax = array_sum(Hash::extract($order , 'items.{n}.tax'));
-			$items_total = array_sum(array($items_subtotal , $items_tax, $items_shipping));
-			$nvps['PAYMENTREQUEST_0_ITEMAMT'] = $items_subtotal;
-			$nvps['PAYMENTREQUEST_0_SHIPPINGAMT'] = $items_shipping;
-			$nvps['PAYMENTREQUEST_0_TAXAMT'] = $items_tax;
-			$nvps['PAYMENTREQUEST_0_AMT'] = $items_total;
-			// Paypal only supports 10 items in express checkout
-			if (count($order['items']) > 10) {
-				return $nvps;
-			}
+			// Cart totals
+			$nvps['PAYMENTREQUEST_0_ITEMAMT'] = 0;
+			$nvps['PAYMENTREQUEST_0_SHIPPINGAMT'] = 0;
+			$nvps['PAYMENTREQUEST_0_TAXAMT'] = 0;
+			$nvps['PAYMENTREQUEST_0_AMT'] = 0;
+			// Build each item
 			foreach ($order['items'] as $m => $item) {
-				$nvps["L_PAYMENTREQUEST_0_NAME$m"] = $item['name'];
+				// Name and subtotal are required for each item
+				$nvps["L_PAYMENTREQUEST_0_NAME$m"] = $item['name'];	
+				// Description an Tax are optional
                 if (array_key_exists("description", $item)) {
 					$nvps["L_PAYMENTREQUEST_0_DESC$m"] = $item['description'];
 				}
-                if (array_key_exists("tax", $item)) {
-					$nvps["L_PAYMENTREQUEST_0_TAXAMT$m"] = $item['tax'];
+				// Qty is optional however it effects our order totals
+				$quantity = $nvps["L_PAYMENTREQUEST_0_QTY$m"] = 1;
+				if (array_key_exists("qty", $item) && $item['qty'] > 1 && is_numeric($item['qty'])) {
+					$quantity = $nvps["L_PAYMENTREQUEST_0_QTY$m"] = $item['qty'];
 				}
+				// Item subtotal
 				$nvps["L_PAYMENTREQUEST_0_AMT$m"] = $item['subtotal'];
-				$nvps["L_PAYMENTREQUEST_0_QTY$m"] = 1;
+				// Shipping
+				if (array_key_exists("shipping", $item)) {
+					$nvps['PAYMENTREQUEST_0_SHIPPINGAMT'] += ($item['shipping'] * $quantity);
+					$nvps['PAYMENTREQUEST_0_AMT'] += ($item['shipping'] * $quantity);
+				}
+				// Tax
+				if (array_key_exists("tax", $item)) {
+					$nvps["L_PAYMENTREQUEST_0_TAXAMT$m"] = $item['tax'];
+					$nvps['PAYMENTREQUEST_0_AMT'] += ($item['tax'] * $quantity);
+					$nvps['PAYMENTREQUEST_0_TAXAMT'] += ($item['tax'] * $quantity);
+				}
+				// Cart totals
+				$nvps['PAYMENTREQUEST_0_ITEMAMT'] += ($nvps["L_PAYMENTREQUEST_0_AMT$m"] * $quantity);
+				$nvps['PAYMENTREQUEST_0_AMT'] += ($nvps["L_PAYMENTREQUEST_0_AMT$m"] * $quantity);
 			}
 		}
 		return $nvps;
