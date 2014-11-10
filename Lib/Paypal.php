@@ -836,6 +836,10 @@ class Paypal {
 				$nvps['PAYMENTREQUEST_0_AMT'] += ($nvps["L_PAYMENTREQUEST_0_AMT$m"] * $quantity);
 			}
 		}
+		// Custom/combined shipping for all items
+		if (isset($order['shipping']) && $order['shipping'] > 1 && is_numeric($order['shipping'])) {
+			$nvps['PAYMENTREQUEST_0_SHIPPINGAMT'] = $order['shipping'];
+		}
 		return $nvps;
 	}
 	
