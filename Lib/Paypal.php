@@ -5,7 +5,7 @@
  *
  * Licensed under The MIT License
  * Redistributions of files must retain the above copyright notice
- *
+ * @version 	  1.0.2
  * @copyright     Rob Mcvey on 2013-07-04.
  * @link          www.copify.com
  * @license       MIT License (http://www.opensource.org/licenses/mit-license.php)
