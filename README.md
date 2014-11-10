@@ -70,20 +70,21 @@ $order = array(
 	'return' => 'https://www.my-amazing-clothes-store.com/review-paypal.php',
 	'cancel' => 'https://www.my-amazing-clothes-store.com/checkout.php',
 	'custom' => 'bingbong',
+	'shipping' => '4.50',
 	'items' => array(
 		0 => array(
 			'name' => 'Blue shoes',
 			'description' => 'A pair of really great blue shoes',
 			'tax' => 2.00,
-			'shipping' => 0.00,
 			'subtotal' => 8.00,
+			'qty' => 1,
 		),
 		1 => array(
 			'name' => 'Red trousers',
 			'description' => 'Tight pair of red pants, look good with a hat.',
-			'tax' => 2.00,
-			'shipping' => 2.00,
-			'subtotal' => 6.00
+			'tax' => 1.50,
+			'subtotal' => 6.00,
+			'qty' => 3,
 		),
 	)
 );
@@ -119,20 +120,21 @@ $order = array(
 	'return' => 'https://www.my-amazing-clothes-store.com/review-paypal.php',
 	'cancel' => 'https://www.my-amazing-clothes-store.com/checkout.php',
 	'custom' => 'bingbong',
+	'shipping' => '4.50',
 	'items' => array(
 		0 => array(
 			'name' => 'Blue shoes',
 			'description' => 'A pair of really great blue shoes',
 			'tax' => 2.00,
-			'shipping' => 0.00,
 			'subtotal' => 8.00,
+			'qty' => 1,
 		),
 		1 => array(
 			'name' => 'Red trousers',
 			'description' => 'Tight pair of red pants, look good with a hat.',
-			'tax' => 2.00,
-			'shipping' => 2.00,
-			'subtotal' => 6.00
+			'tax' => 1.50,
+			'subtotal' => 6.00,
+			'qty' => 3,
 		),
 	)
 );

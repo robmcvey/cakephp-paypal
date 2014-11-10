@@ -802,7 +802,7 @@ class Paypal {
 		if (isset($order['items']) && is_array($order['items'])) {
 			// Cart totals
 			$nvps['PAYMENTREQUEST_0_ITEMAMT'] = 0;
-			$nvps['PAYMENTREQUEST_0_SHIPPINGAMT'] = 0;
+			$individualShipping = $nvps['PAYMENTREQUEST_0_SHIPPINGAMT'] = 0;
 			$nvps['PAYMENTREQUEST_0_TAXAMT'] = 0;
 			$nvps['PAYMENTREQUEST_0_AMT'] = 0;
 			// Build each item
@@ -816,14 +816,14 @@ class Paypal {
 				// Qty is optional however it effects our order totals
 				$quantity = $nvps["L_PAYMENTREQUEST_0_QTY$m"] = 1;
 				if (array_key_exists("qty", $item) && $item['qty'] > 1 && is_numeric($item['qty'])) {
-					$quantity = $nvps["L_PAYMENTREQUEST_0_QTY$m"] = $item['qty'];
+					$quantity = $nvps["L_PAYMENTREQUEST_0_QTY$m"] = (int) floor($item['qty']);
 				}
 				// Item subtotal
 				$nvps["L_PAYMENTREQUEST_0_AMT$m"] = $item['subtotal'];
 				// Shipping
 				if (array_key_exists("shipping", $item)) {
-					$nvps['PAYMENTREQUEST_0_SHIPPINGAMT'] += ($item['shipping'] * $quantity);
-					$nvps['PAYMENTREQUEST_0_AMT'] += ($item['shipping'] * $quantity);
+					//$nvps['PAYMENTREQUEST_0_SHIPPINGAMT'] += ($item['shipping'] * $quantity);
+					$individualShipping += ($item['shipping'] * $quantity);
 				}
 				// Tax
 				if (array_key_exists("tax", $item)) {
@@ -839,6 +839,10 @@ class Paypal {
 		// Custom/combined shipping for all items
 		if (isset($order['shipping']) && $order['shipping'] > 1 && is_numeric($order['shipping'])) {
 			$nvps['PAYMENTREQUEST_0_SHIPPINGAMT'] = $order['shipping'];
+			$nvps['PAYMENTREQUEST_0_AMT'] += $nvps['PAYMENTREQUEST_0_SHIPPINGAMT'];
+		} else if (isset($individualShipping)) {
+			$nvps['PAYMENTREQUEST_0_SHIPPINGAMT'] = $individualShipping;
+			$nvps['PAYMENTREQUEST_0_AMT'] += $individualShipping;
 		}
 		return $nvps;
 	}
