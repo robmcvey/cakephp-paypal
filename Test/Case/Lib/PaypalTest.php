@@ -1511,6 +1511,65 @@ class PaypalTestCase extends CakeTestCase {
 	}
 
 /**
+ * testBuildExpressCheckoutNvpBasics
+ *
+ * @return void
+ * @author Rob Mcvey
+ **/
+	public function testBuildExpressCheckoutNvpBasics() {
+		$this->Paypal = new Paypal(array(
+			'sandboxMode' => true,
+			'nvpUsername' => 'foo',
+			'nvpPassword' => 'bar',
+			'nvpSignature' => 'foobar'
+		));
+		$order = array(
+			'description' => 'Your purchase with Acme clothes store',
+			'currency' => 'GBP',
+			'return' => 'https://www.my-amazing-clothes-store.com/review-paypal.php',
+			'cancel' => 'https://www.my-amazing-clothes-store.com/checkout.php',
+			'custom' => 'bingbong',
+			'items' => array(
+				0 => array(
+					'name' => 'Blue shoes',
+					'subtotal' => 8.00,
+				),
+				1 => array(
+					'name' => 'Red trousers',
+					'shipping' => 2.00,
+					'subtotal' => 6.00
+				),
+			)
+		);
+		$expected = array(
+			'METHOD' => 'SetExpressCheckout',
+			'VERSION' => '104.0',
+			'PAYMENTREQUEST_0_PAYMENTACTION' => 'Sale',
+			'USER' => 'foo',
+			'PWD' => 'bar',
+			'SIGNATURE' => 'foobar',
+			'RETURNURL' => 'https://www.my-amazing-clothes-store.com/review-paypal.php',
+			'CANCELURL' => 'https://www.my-amazing-clothes-store.com/checkout.php',
+			'PAYMENTREQUEST_0_CURRENCYCODE' => 'GBP',
+			'PAYMENTREQUEST_0_ITEMAMT' => 14.00,
+			'PAYMENTREQUEST_0_SHIPPINGAMT' => 2.00,
+			'PAYMENTREQUEST_0_TAXAMT' => 0.00,
+			'PAYMENTREQUEST_0_AMT' => 16.00,
+			'PAYMENTREQUEST_0_DESC' => 'Your purchase with Acme clothes store',
+			'PAYMENTREQUEST_0_CUSTOM' => 'bingbong',
+			'L_PAYMENTREQUEST_0_NAME0' => 'Blue shoes',
+			'L_PAYMENTREQUEST_0_AMT0' => 8.00,
+			'L_PAYMENTREQUEST_0_QTY0' => 1,
+			'L_PAYMENTREQUEST_0_NAME1' => 'Red trousers',
+			'L_PAYMENTREQUEST_0_AMT1' => 6.00,
+			'L_PAYMENTREQUEST_0_QTY1' => 1,
+		);
+		
+		$result = $this->Paypal->buildExpressCheckoutNvp($order);
+		$this->assertEqual($expected , $result);
+	}
+
+/**
  * test buildExpressCheckoutNvp
  *
  * @return void
