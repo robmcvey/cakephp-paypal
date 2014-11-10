@@ -1635,6 +1635,72 @@ class PaypalTestCase extends CakeTestCase {
 	}	
 
 /**
+* testBuildExpressCheckoutCustomShippingTotal
+*
+* @return void
+* @author Rob Mcvey
+**/
+	public function testBuildExpressCheckoutCustomShippingTotal() {
+		$this->Paypal = new Paypal(array(
+			'sandboxMode' => true,
+			'nvpUsername' => 'foo',
+			'nvpPassword' => 'bar',
+			'nvpSignature' => 'foobar'
+		));
+		$order = array(
+			'description' => 'Your purchase with Acme clothes store',
+			'currency' => 'GBP',
+			'return' => 'https://www.my-amazing-clothes-store.com/review-paypal.php',
+			'cancel' => 'https://www.my-amazing-clothes-store.com/checkout.php',
+			'custom' => 'bingbong',
+			'shipping' => 53.10,
+			'items' => array(
+				0 => array(
+					'name' => 'Blue shoes',
+					'description' => 'A pair of really great blue shoes',
+					'tax' => 2.00,
+					'qty' => 4,
+					'shipping' => 2.00,
+					'subtotal' => 8.00, // 12 x 4 = 48
+				),
+				1 => array(
+					'name' => 'Red trousers',
+					'description' => 'Tight pair of red pants, look good with a hat.',
+					'subtotal' => 10.00
+				),
+			)
+		);
+		$expected = array(
+			'METHOD' => 'SetExpressCheckout',
+			'VERSION' => '104.0',
+			'PAYMENTREQUEST_0_PAYMENTACTION' => 'Sale',
+			'USER' => 'foo',
+			'PWD' => 'bar',
+			'SIGNATURE' => 'foobar',
+			'RETURNURL' => 'https://www.my-amazing-clothes-store.com/review-paypal.php',
+			'CANCELURL' => 'https://www.my-amazing-clothes-store.com/checkout.php',
+			'PAYMENTREQUEST_0_CURRENCYCODE' => 'GBP',
+			'PAYMENTREQUEST_0_ITEMAMT' => 42.00, 
+			'PAYMENTREQUEST_0_SHIPPINGAMT' => 53.10,
+			'PAYMENTREQUEST_0_TAXAMT' => 8.00,
+			'PAYMENTREQUEST_0_AMT' => 58.00,
+			'PAYMENTREQUEST_0_DESC' => 'Your purchase with Acme clothes store',
+			'PAYMENTREQUEST_0_CUSTOM' => 'bingbong',
+			'L_PAYMENTREQUEST_0_NAME0' => 'Blue shoes',
+			'L_PAYMENTREQUEST_0_DESC0' => 'A pair of really great blue shoes',
+			'L_PAYMENTREQUEST_0_TAXAMT0' => 2.00,
+			'L_PAYMENTREQUEST_0_AMT0' => 8.00,
+			'L_PAYMENTREQUEST_0_QTY0' => 4,
+			'L_PAYMENTREQUEST_0_NAME1' => 'Red trousers',
+			'L_PAYMENTREQUEST_0_DESC1' => 'Tight pair of red pants, look good with a hat.',
+			'L_PAYMENTREQUEST_0_AMT1' => 10.00,
+			'L_PAYMENTREQUEST_0_QTY1' => 1,
+		);
+		$result = $this->Paypal->buildExpressCheckoutNvp($order);
+		$this->assertEqual($expected , $result);
+	}
+
+/**
  * test buildExpressCheckoutNvp exceptions
  *
  * @return void
