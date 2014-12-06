@@ -55,6 +55,11 @@ class Paypal {
 	protected $nvpSignature = null;
 
 /**
+ * Partner Code - buttonsource
+ */
+    protected $nvpButtonsource = 'AngellEYE_SP_RobMcvey_CakePHP';
+
+/**
  * API credentials - nvp token
  */
     protected $nvpToken = null;
@@ -336,6 +341,7 @@ class Paypal {
                 'USER' => $this->nvpUsername,
                 'PWD' => $this->nvpPassword,
                 'SIGNATURE' => $this->nvpSignature,
+                'BUTTONSOURCE' => $this->nvpButtonsource,
             );
             // HttpSocket
             if (!$this->HttpSocket) {
@@ -747,6 +753,7 @@ class Paypal {
 			'USER' => $this->nvpUsername,
 			'PWD' => $this->nvpPassword,
 			'SIGNATURE' => $this->nvpSignature,
+            'BUTTONSOURCE' => $this->nvpButtonsource,
 			'IPADDRESS' => $ipAddress, 		// Required
 			'AMT' => $payment['amount'], 	// The total cost of the transaction
 			'CURRENCYCODE' => 'GBP',		// A 3-character currency code
@@ -789,6 +796,7 @@ class Paypal {
 			'USER' => $this->nvpUsername,
 			'PWD' => $this->nvpPassword,
 			'SIGNATURE' => $this->nvpSignature,
+            'BUTTONSOURCE' => $this->nvpButtonsource,
 			'RETURNURL' => $order['return'],
 			'CANCELURL' => $order['cancel'],
 			'PAYMENTREQUEST_0_CURRENCYCODE' => $order['currency'],
@@ -883,6 +891,7 @@ class Paypal {
 			'USER' => $this->nvpUsername,
 			'PWD' => $this->nvpPassword,
 			'SIGNATURE' => $this->nvpSignature,
+            'BUTTONSOURCE' => $this->nvpButtonsource,
 			'TRANSACTIONID' => $refund['transactionId'],	// The orginal PayPal Transaction ID
 			'INVOICEID' => $reference,						// Your own reference or invoice number
 			'REFUNDTYPE' => $refund['type'],				// Full, Partial, ExternalDispute, Other
