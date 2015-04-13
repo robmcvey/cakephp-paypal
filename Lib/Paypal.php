@@ -415,10 +415,10 @@ class Paypal {
 				throw new PaypalException($this->getErrorMessage($parsed));
 			}
 			else {
-				throw new PaypalException(__d('paypal' , 'There was an error completing the payment'));
+				throw new PaypalException(__d('paypal', 'There was an error completing the payment'));
 			}
 		} catch (SocketException $e) {
-			throw new PaypalException(__d('paypal','There was a problem processing the transaction, please try again.'));
+			throw new PaypalException(__d('paypal', 'There was a problem processing the transaction, please try again.'));
 		}
 	}
 
