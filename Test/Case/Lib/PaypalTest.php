@@ -585,7 +585,7 @@ class PaypalTestCase extends CakeTestCase {
 		$payerId = 'GSEK8P4ARYMYS';
 		$expectedEndpoint = 'https://api-3t.sandbox.paypal.com/nvp';
 		// Response to return
-		$mockResponse = 'TOKEN=EC%2d482053995J417352W&TIMESTAMP=2013%2d07%2d05T11%3a41%3a07Z&CORRELATIONID=a4821326a65c6&ACK=Failure&VERSION=104%2e0&BUILD=6680107&L_ERRORCODE0=10486&L_SHORTMESSAGE0=This%20transaction%20couldn%27t%20be%20completed.&L_LONGMESSAGE0=This%20transaction%20couldn%27t%20be%20completed.%20Please%20redirect%20your%20customer%20to%20PayPal.';
+		$mockResponse = 'TIMESTAMP=2013%2d07%2d05T11%3a41%3a07Z&CORRELATIONID=a4821326a65c6&ACK=Failure&VERSION=104%2e0&BUILD=6680107&L_ERRORCODE0=10486&L_SHORTMESSAGE0=This%20transaction%20couldn%27t%20be%20completed.&L_LONGMESSAGE0=This%20transaction%20couldn%27t%20be%20completed.%20Please%20redirect%20your%20customer%20to%20PayPal.';
 		$expectedNvps = array(
 			'METHOD' => 'DoExpressCheckoutPayment',
 			'VERSION' => '104.0',
