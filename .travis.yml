@@ -9,7 +9,7 @@ php:
 before_script:
   - wget https://phar.phpunit.de/phpunit-3.7.31.phar
   - chmod +x phpunit-3.7.31.phar
-  - mv phpunit-3.7.31.phar /usr/local/bin/phpunit
+  - sudo mv phpunit-3.7.31.phar /usr/bin/phpunit
   - phpunit --version
   - mysql -e 'CREATE DATABASE cakephp_test;'
   - echo -e "Host github.com\n\tStrictHostKeyChecking no\n" >> ~/.ssh/config
