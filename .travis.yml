@@ -7,13 +7,11 @@ php:
   - 5.6
 
 before_script:
-  - wget https://phar.phpunit.de/phpunit-3.7.31.phar
-  - chmod +x phpunit-3.7.31.phar
-  - sudo mv phpunit-3.7.31.phar /usr/bin/phpunit
-  - phpunit --version
+  - sh -c "composer global require 'phpunit/phpunit=3.7.33'"
   - mysql -e 'CREATE DATABASE cakephp_test;'
   - echo -e "Host github.com\n\tStrictHostKeyChecking no\n" >> ~/.ssh/config
   - git clone --depth 2 --branch 2.5.7 https://github.com/cakephp/cakephp.git
+  - sh -c "ln -s ~/.composer/vendor/phpunit/phpunit/PHPUnit cakephp/vendors/PHPUnit"
   - mkdir cakephp/app/Plugin/Paypal
   - cp -r Lib cakephp/app/Plugin/Paypal/ 
   - cp -r Test cakephp/app/Plugin/Paypal/
