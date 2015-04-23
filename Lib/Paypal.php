@@ -460,6 +460,85 @@ class Paypal {
 	}
 
 /**
+ * DoCapture
+ * The DoCapture API Operation enables you to charge a previously authorized payment
+ *
+ * @param array $payment Transaction Id and amount details to process
+ * @return void
+ * @author Michael Houghton
+ **/
+	public function doCapture($payment) {
+		try {
+			// Build NVPs
+			$nvps = $this->formatDoCaptureNvps($payment);
+
+			// HttpSocket
+			if (!$this->HttpSocket) {
+				$this->HttpSocket = new HttpSocket();
+			}
+			// Classic API endpoint
+			$endPoint = $this->getClassicEndpoint();
+			// Make a Http request for a new token
+			$response = $this->HttpSocket->post($endPoint , $nvps);
+			// Parse the results
+			$parsed = $this->parseClassicApiResponse($response);
+
+			// Handle the resposne
+			if (isset($parsed['ACK']) && isset($parsed['ACK']) && in_array($parsed['ACK'], array('Success', 'SuccessWithWarning')))  {
+				return $parsed;
+			}
+			else if ($parsed['ACK'] == "Failure" && isset($parsed['L_LONGMESSAGE0']))  {
+				throw new PaypalException($this->getErrorMessage($parsed));
+			}
+			else {
+				throw new PaypalException(__d('paypal' , 'There was an error processing the payment'));
+			}
+		} catch (SocketException $e) {
+			throw new PaypalException(__d('paypal', 'There was a problem processing the payment, please try again.'));
+		}
+	}
+
+/**
+ * Formats the DoCatpure array to Paypal nvps
+ *
+ * @param array $order Takes an array order (See tests for supported fields).
+ * @return array Formatted array of Paypal NVPs for DoCapture
+ * @author Michael Houghton
+ **/
+	public function formatDoCaptureNvps($order) {
+		if (empty($order) || !is_array($order)) {
+			throw new PaypalException(__d('paypal' , 'You must pass a valid order array'));
+		}
+		if (!isset($order['authorization_id'])) {
+			throw new PaypalException(__d('paypal' , 'authorization_id must be passed.'));
+		}
+		if (!isset($order['amount'])) {
+			throw new PaypalException(__d('paypal' , 'You must pass an amount must be passed.'));
+		}
+		if (!isset($order['currency']))  {
+			throw new PaypalException(__d('paypal' , 'You must provide a currency code'));
+		}
+
+		if (empty($order['complete'])) {
+			$order['complete'] = 'NotComplete';
+		} else {
+			$order['complete'] = 'Complete';
+		}
+
+		return array(
+			'METHOD' => 'DoCapture',
+			'VERSION' => $this->paypalClassicApiVersion,
+			'USER' => $this->nvpUsername,
+			'PWD' => $this->nvpPassword,
+			'SIGNATURE' => $this->nvpSignature,
+			'AUTHORIZATIONID' => $order['authorization_id'],
+			'AMT' => $order['amount'],
+			'CURRENCYCODE' => $order['currency'],
+			'COMPLETETYPE' => $order['complete'],
+		);
+	}
+
+/**
  * RefundTransaction
  * The RefundTransaction API Operation enables you to refund a transaction that is less than 60 days old.
  *
@@ -495,7 +574,7 @@ class Paypal {
 			throw new PaypalException(__d('paypal', 'A problem occurred during the refund process, please try again.'));
 		}
 	}
-	
+
 /**
  * Store and use a customer credit card
  *
@@ -517,7 +596,7 @@ class Paypal {
 		$endPoint = $this->storeCreditCardUrl();
 		// JSON encode our card array
 		$json = json_encode($this->formatStoreCreditCardArgs($creditCard));
-		// Add oAuth headers and content type headers	
+		// Add oAuth headers and content type headers
 		$request = array(
 			'method' => 'POST',
 			'header' => array(
@@ -539,7 +618,7 @@ class Paypal {
 			throw new PaypalException($message);
 		}
 	}
-	
+
 /**
  * Charge a stored card
  *
@@ -561,7 +640,7 @@ class Paypal {
 		$endPoint = $this->chargeStoredCardUrl();
 		// JSON encode our card array
 		$json = json_encode($transaction);
-		// Add oAuth headers and content type headers	
+		// Add oAuth headers and content type headers
 		$request = array(
 			'method' => 'POST',
 			'header' => array(
@@ -583,7 +662,7 @@ class Paypal {
 			throw new PaypalException($message);
 		}
 	}
-	
+
 /**
  * Get an access token
  *
@@ -618,7 +697,7 @@ class Paypal {
 			throw new PaypalException($message);
 		}
 	}
-	
+
 /**
  * Takes an array containing info of a single card, and formats as per storeCreditCard
  * e.g.
@@ -686,7 +765,7 @@ class Paypal {
 		);
 		return $object;
 	}
-	
+
 /**
  * Validates a credit card number
  * Note: We use this becuase when storing a card, paypal doen not validate!!!
@@ -697,7 +776,7 @@ class Paypal {
 	public function validateCC($cc) {
 		return Validation::cc($cc);
 	}
-	
+
 /**
  * Takes a payment array and formats in to the minimum NVPs to complete a payment
  *
@@ -808,7 +887,7 @@ class Paypal {
 			// Build each item
 			foreach ($order['items'] as $m => $item) {
 				// Name and subtotal are required for each item
-				$nvps["L_PAYMENTREQUEST_0_NAME$m"] = $item['name'];	
+				$nvps["L_PAYMENTREQUEST_0_NAME$m"] = $item['name'];
 				// Description an Tax are optional
                 if (array_key_exists("description", $item)) {
 					$nvps["L_PAYMENTREQUEST_0_DESC$m"] = $item['description'];
@@ -846,7 +925,7 @@ class Paypal {
 		}
 		return $nvps;
 	}
-	
+
 /**
  * Takes a refund transaction array and formats in to the minimum NVPs to process a refund
  *
@@ -889,7 +968,7 @@ class Paypal {
 			'CURRENCYCODE' => $currency, 					// Only required for partial refunds or refunds greater than 100%
 			'NOTE' => $note,								// Up to 255 characters of information displayed to customer
 			'REFUNDSOURCE' => $source,						// Any, default, instant, eCheck
-		);	
+		);
 		// Refund amount, only set if REFUNDTYPE is Partial
 		if ($refund['type'] == 'Partial') {
 			$nvps['AMT'] = $refund['amount'];
@@ -932,7 +1011,7 @@ class Paypal {
 	public function oAuthTokenUrl() {
 		return $this->getRestEndpoint() . '/v1/oauth2/token';
 	}
-	
+
 /**
  * chargeStoredCardUrl
  *
@@ -942,7 +1021,7 @@ class Paypal {
 	public function chargeStoredCardUrl() {
 		return $this->getRestEndpoint() . '/v1/payments/payment';
 	}
-	
+
 /**
  * storeCreditCardUrl
  *
@@ -951,7 +1030,7 @@ class Paypal {
  **/
 	public function storeCreditCardUrl() {
 		return $this->getRestEndpoint() . '/v1/vault/credit-card';
-	}	
+	}
 
 /**
  * Returns Paypal Adaptive Accounts API endpoint

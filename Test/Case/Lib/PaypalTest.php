@@ -1167,7 +1167,7 @@ class PaypalTestCase extends CakeTestCase {
 		);
 		$result = $this->Paypal->getExpressCheckoutDetails($token);
 		$this->assertEqual($expected , $result);
-	}	
+	}
 
 /**
  * test doExpressCheckoutPayment
@@ -1375,7 +1375,7 @@ class PaypalTestCase extends CakeTestCase {
 			'PAYMENTINFO_0_ACK' => 'Success'
 		);
 		$result = $this->Paypal->doExpressCheckoutPayment($order , $token , $payerId);
-	}	
+	}
 
 /**
  * test parseClassicApiResponse
@@ -1564,11 +1564,11 @@ class PaypalTestCase extends CakeTestCase {
 			'L_PAYMENTREQUEST_0_AMT1' => 6.00,
 			'L_PAYMENTREQUEST_0_QTY1' => 1,
 		);
-		
+
 		$result = $this->Paypal->buildExpressCheckoutNvp($order);
 		$this->assertEqual($expected , $result);
 	}
-	
+
 /**
 * testBuildExpressCheckoutNvpQty
 *
@@ -1614,7 +1614,7 @@ class PaypalTestCase extends CakeTestCase {
 			'RETURNURL' => 'https://www.my-amazing-clothes-store.com/review-paypal.php',
 			'CANCELURL' => 'https://www.my-amazing-clothes-store.com/checkout.php',
 			'PAYMENTREQUEST_0_CURRENCYCODE' => 'GBP',
-			'PAYMENTREQUEST_0_ITEMAMT' => 42.00, 
+			'PAYMENTREQUEST_0_ITEMAMT' => 42.00,
 			'PAYMENTREQUEST_0_SHIPPINGAMT' => 8.00,
 			'PAYMENTREQUEST_0_TAXAMT' => 8.00,
 			'PAYMENTREQUEST_0_AMT' => 58.00,
@@ -1632,7 +1632,7 @@ class PaypalTestCase extends CakeTestCase {
 		);
 		$result = $this->Paypal->buildExpressCheckoutNvp($order);
 		$this->assertEqual($expected , $result);
-	}	
+	}
 
 /**
 * testBuildExpressCheckoutCustomShippingTotalMain
@@ -1669,7 +1669,7 @@ class PaypalTestCase extends CakeTestCase {
 					'subtotal' => 10.00
 				),
 			)
-		);	
+		);
 		$expected = array(
 			'METHOD' => 'SetExpressCheckout',
 			'VERSION' => '104.0',
@@ -1695,11 +1695,11 @@ class PaypalTestCase extends CakeTestCase {
 			'L_PAYMENTREQUEST_0_DESC1' => 'Tight pair of red pants, look good with a hat.',
 			'L_PAYMENTREQUEST_0_QTY1' => 1,
 			'L_PAYMENTREQUEST_0_AMT1' => 10
-		);		
+		);
 		$result = $this->Paypal->buildExpressCheckoutNvp($order);
 		$this->assertEqual($expected , $result);
 	}
-	
+
 /**
  * testBuildExpressCheckoutCustomShippingTotalWithQtyNotInt
  *
@@ -1747,7 +1747,7 @@ class PaypalTestCase extends CakeTestCase {
 			'RETURNURL' => 'https://www.my-amazing-clothes-store.com/review-paypal.php',
 			'CANCELURL' => 'https://www.my-amazing-clothes-store.com/checkout.php',
 			'PAYMENTREQUEST_0_CURRENCYCODE' => 'GBP',
-			'PAYMENTREQUEST_0_ITEMAMT' => 26.00, 
+			'PAYMENTREQUEST_0_ITEMAMT' => 26.00,
 			'PAYMENTREQUEST_0_SHIPPINGAMT' => 4.50,
 			'PAYMENTREQUEST_0_TAXAMT' => 6.50,
 			'PAYMENTREQUEST_0_AMT' => 37.00,
@@ -1888,7 +1888,7 @@ class PaypalTestCase extends CakeTestCase {
 		);
 		$this->assertEqual($expected , $result);
 	}
-	
+
 /**
  * testDoDirectPaymentSuccessWithWarning
  *
@@ -1961,7 +1961,7 @@ class PaypalTestCase extends CakeTestCase {
 			'TRANSACTIONID' => '0XW09448VG556664J'
 		);
 		$this->assertEqual($expected , $result);
-	}	
+	}
 
 /**
  * test formatDoDirectPaymentNvps
@@ -2014,7 +2014,44 @@ class PaypalTestCase extends CakeTestCase {
 		);
 		$this->assertEqual($expected , $result);
 	}
-	
+
+/**
+ * test formatDoCaptureNvps
+ *
+ * @return void
+ * @author Michael Houghton
+ **/
+	public function testformatDoCaptureNvps() {
+		$this->Paypal = new Paypal(array(
+			'sandboxMode' => true,
+			'nvpUsername' => 'foo',
+			'nvpPassword' => 'bar',
+			'nvpSignature' => 'foobar'
+		));
+
+		$payment = array();
+		$payment['authorization_id'] = '9MT40927JS1733007';
+		$payment['amount']           = 30.00;
+		$payment['currency']         = 'USD';
+		$payment['complete']    = true;
+
+		$result = $this->Paypal->formatDoCaptureNvps($payment);
+
+		$expected = array(
+			'METHOD' => 'DoCapture',
+			'VERSION' => '104.0',
+			'USER' => 'foo',
+			'PWD' => 'bar',
+			'SIGNATURE' => 'foobar',
+			'AUTHORIZATIONID' => '9MT40927JS1733007',
+			'AMT' => 30.00,
+			'CURRENCYCODE' => 'USD',
+			'COMPLETETYPE' => 'Complete'
+		);
+
+		$this->assertEqual($expected , $result);
+	}
+
 /**
  * testFormatRefundTransactionNvpsMissingTransId
  *
@@ -2211,7 +2248,7 @@ class PaypalTestCase extends CakeTestCase {
 			'PENDINGREASON' => 'None'
 		);
 		$this->assertEqual($expectedParsedResponse, $result);
-	}		
+	}
 
 /**
  * testRefundTransactionRequestPartial
@@ -2274,7 +2311,7 @@ class PaypalTestCase extends CakeTestCase {
 		);
 		$this->assertEqual($expectedParsedResponse, $result);
 	}
-	
+
 /**
  * testValidateCC
  *
@@ -2294,7 +2331,7 @@ class PaypalTestCase extends CakeTestCase {
 		$this->assertFalse($this->Paypal->validateCC('2341324'));
 		$this->assertTrue($this->Paypal->validateCC('4008 0687 0641 8697 '));
 	}
-	
+
 /**
  * testStoreCreditCard
  *
@@ -2324,28 +2361,28 @@ class PaypalTestCase extends CakeTestCase {
 			'app_id' => 'APP-80W284485P519543T',
 			'expires_in' => 28800
 		));
-		
+
 		$HttpSocketResponse = new stdClass();
 		$HttpSocketResponse->body = $expectedTokenResponse;
 		$HttpSocketResponse->code = 200;
-		
+
 		$this->Paypal->HttpSocket->expects($this->once())
 			->method('post')
 			->with('https://api.sandbox.paypal.com/v1/oauth2/token', array(
 				"grant_type" => "client_credentials"
 			))
 			->will($this->returnValue($HttpSocketResponse));
-			
+
 		// Mock the HttpSocket reset method
 		$this->Paypal->HttpSocket->expects($this->once())
 			->method('reset');
 		// Mock the HttpSocket request method
 		$mockResponse = '{"id":"CARD-5LH05598KW1155459KMYXT7I","state":"ok","payer_id":"186","type":"visa","number":"xxxxxxxxxxxx8697","expire_month":"2","expire_year":"2018","first_name":"Joe","last_name":"Shopper","valid_until":"2017-03-24T00:00:00Z","create_time":"2014-03-25T12:43:41Z","update_time":"2014-03-25T12:43:41Z","links":[{"href":"https://api.sandbox.paypal.com/v1/vault/credit-card/CARD-5LH05598KW1155459KMYXT7I","rel":"self","method":"GET"},{"href":"https://api.sandbox.paypal.com/v1/vault/credit-card/CARD-5LH05598KW1155459KMYXT7I","rel":"delete","method":"DELETE"},{"href":"https://api.sandbox.paypal.com/v1/vault/credit-card/CARD-5LH05598KW1155459KMYXT7I","rel":"patch","method":"PATCH"}]}';
-		
+
 		$HttpSocketResponse = new stdClass();
 		$HttpSocketResponse->body = $mockResponse;
 		$HttpSocketResponse->code = 200;
-		
+
 		$mockRequest = array(
 			'method' => 'POST',
 			'header' => array(
@@ -2449,7 +2486,7 @@ class PaypalTestCase extends CakeTestCase {
 			->with('https://api.sandbox.paypal.com/v1/oauth2/token', array(
 				"grant_type" => "client_credentials"
 			))
-			->will($this->returnValue($HttpSocketResponse));	
+			->will($this->returnValue($HttpSocketResponse));
 		// Mock the HttpSocket reset method
 		$this->Paypal->HttpSocket->expects($this->once())
 			->method('reset');
@@ -2500,7 +2537,7 @@ class PaypalTestCase extends CakeTestCase {
 			'last_name' => 'Shopper'
 		);
 		$result = $this->Paypal->storeCreditCard($creditCard);
-	}	
+	}
 
 /**
  * testStoreFormatCreditCardArgs
@@ -2540,7 +2577,7 @@ class PaypalTestCase extends CakeTestCase {
 		$result = $this->Paypal->formatStoreCreditCardArgs($creditCard);
 		$this->assertEqual($expected, $result);
 	}
-	
+
 /**
  * testStoreFormatCreditCardArgsMissingCard
  *
@@ -2629,7 +2666,7 @@ class PaypalTestCase extends CakeTestCase {
 		);
 		$result = $this->Paypal->formatStoreCreditCardArgs($creditCard);
 	}
-	
+
 /**
  * testStoreFormatCreditCardArgsInvalidType
  *
@@ -2659,7 +2696,7 @@ class PaypalTestCase extends CakeTestCase {
 		);
 		$result = $this->Paypal->formatStoreCreditCardArgs($creditCard);
 	}
-	
+
 /**
  * testStoreCreditCardUrl
  *
@@ -2676,7 +2713,7 @@ class PaypalTestCase extends CakeTestCase {
 		$endpoint = $this->Paypal->storeCreditCardUrl();
 		$this->assertEqual('https://api.sandbox.paypal.com/v1/vault/credit-card', $endpoint);
 	}
-	
+
 /**
  * testGetOAuthAccessToken
  *
@@ -2698,11 +2735,11 @@ class PaypalTestCase extends CakeTestCase {
 		$this->Paypal->HttpSocket->expects($this->once())
 			->method('configAuth')
 			->with('Basic', '1ROu-BDs2U35hVZkITi2WzX98cbNahkSeoxsuvfmrXNTz-gA5EGslxk0fAFU', 'FO6RKRBsI2co80qlfPHYQ14G-U9Smbz4H8fUIY9Mf846URRNdYNNXQ2wghxC');
-		
+
 		$HttpSocketResponse = new stdClass();
 		$HttpSocketResponse->body = '{"scope":"openid https:\/\/api.paypal.com\/v1\/payments\/.* https:\/\/api.paypal.com\/v1\/developer\/.* https:\/\/api.paypal.com\/v1\/vault\/credit-card\/.* https:\/\/api.paypal.com\/v1\/vault\/credit-card","access_token":"V0jzza4UReFGZh3pf-APN3MwhvnATeG0kaQScgzIH3A","token_type":"Bearer","app_id":"APP-80W284485P519543T","expires_in":28800}';
 		$HttpSocketResponse->code = 200;
-		
+
 		// Mock the HttpSocket post method
 		$this->Paypal->HttpSocket->expects($this->once())
 			->method('post')
@@ -2710,7 +2747,7 @@ class PaypalTestCase extends CakeTestCase {
 				"grant_type" => "client_credentials"
 			))
 			->will($this->returnValue($HttpSocketResponse));
-			
+
 		$result = $this->Paypal->getOAuthAccessToken();
 		// Expected response
 		$expected = array(
@@ -2722,7 +2759,7 @@ class PaypalTestCase extends CakeTestCase {
 		);
 		$this->assertEqual($expected, $result);
 	}
-	
+
 /**
  * testGetOAuthAccessTokenHandlesError
  *
@@ -2768,7 +2805,7 @@ class PaypalTestCase extends CakeTestCase {
 			'expires_in' => 28800
 		);
 		$this->assertEqual($expected, $result);
-	}	
+	}
 
 /**
  * testGetOAuthAccessTokenMissingCredentials
@@ -2792,7 +2829,7 @@ class PaypalTestCase extends CakeTestCase {
 		$this->Paypal->HttpSocket->expects($this->never())
 			->method('configAuth');
 		$this->Paypal->getOAuthAccessToken();
-	}	
+	}
 
 /**
  * testOAuthTokenUrl
@@ -2843,8 +2880,8 @@ class PaypalTestCase extends CakeTestCase {
 		));
 		$endpoint = $this->Paypal->chargeStoredCardUrl();
 		$this->assertEqual('https://api.paypal.com/v1/payments/payment', $endpoint);
-	}	
-	
+	}
+
 /**
  * testChargeStoredCard
  *
@@ -2860,7 +2897,7 @@ class PaypalTestCase extends CakeTestCase {
 			'oAuthClientId' => 'ASPu1-BDs2U35hVZkITi2WzX98cbNahkSeoxsuvfmrXNTz-gA5EGslxk0fAFU',
 			'oAuthSecret' => 'EO6RKHYQ14G-U9Smbz4H8fUIY9Mf846URRNdYNNXQ2wghxC',
 		));
-		
+
 		$expectedTokenResponse = array(
 			'scope' => 'openid https://api.paypal.com/v1/payments/.* https://api.paypal.com/v1/vault/credit-card/.* https://api.paypal.com/v1/vault/credit-card',
 			'access_token' => 'Zr-NlxdL6u1kQNUNnG7SYUjsqFIk2OCI7wxGStzPEO8',
@@ -2868,35 +2905,35 @@ class PaypalTestCase extends CakeTestCase {
 			'app_id' => 'APP-7KR335967N254033H',
 			'expires_in' => 28800
 		);
-		
+
 		// Mock the HttpSocket classs
 		$this->Paypal->HttpSocket = $this->getMock('HttpSocket');
-		
+
 		// Mock the HttpSocket configAuth method
 		$this->Paypal->HttpSocket->expects($this->once())
 			->method('configAuth')
 			->with('Basic', 'ASPu1-BDs2U35hVZkITi2WzX98cbNahkSeoxsuvfmrXNTz-gA5EGslxk0fAFU', 'EO6RKHYQ14G-U9Smbz4H8fUIY9Mf846URRNdYNNXQ2wghxC');
-		
+
 		// Mock the HttpSocket post method
 		$expectedTokenResponse = json_encode($expectedTokenResponse);
-		
+
 		$HttpSocketResponse = new stdClass();
 		$HttpSocketResponse->body = $expectedTokenResponse;
 		$HttpSocketResponse->code = 200;
-		
+
 		$this->Paypal->HttpSocket->expects($this->once())
 			->method('post')
 			->with('https://api.sandbox.paypal.com/v1/oauth2/token', array(
 				"grant_type" => "client_credentials"
 			))
 			->will($this->returnValue($HttpSocketResponse));
-		
+
 		// Mock the HttpSocket reset method
 		$this->Paypal->HttpSocket->expects($this->once())
 			->method('reset');
-			
+
 		// Expected JSON to be posted to paypal
-		$expectedJSON = '{"intent":"sale","redirect_urls":{"return_url":"http:\/\/copify.com\/return","cancel_url":"http:\/\/copify.com\/cancel"},"payer":{"payment_method":"credit_card","funding_instruments":[{"credit_card_token":{"credit_card_id":"CARD-39N78604CK9041431KM2DDC2","payer_id":"186"}}]},"transactions":[{"amount":{"total":"0.60","currency":"GBP","details":{"subtotal":"0.50","tax":"0.10","shipping":"0.00"}},"description":"This is test payment to copify"}]}';	
+		$expectedJSON = '{"intent":"sale","redirect_urls":{"return_url":"http:\/\/copify.com\/return","cancel_url":"http:\/\/copify.com\/cancel"},"payer":{"payment_method":"credit_card","funding_instruments":[{"credit_card_token":{"credit_card_id":"CARD-39N78604CK9041431KM2DDC2","payer_id":"186"}}]},"transactions":[{"amount":{"total":"0.60","currency":"GBP","details":{"subtotal":"0.50","tax":"0.10","shipping":"0.00"}},"description":"This is test payment to copify"}]}';
 
 		// Our transaction, we'll build this from the users data
 		$cardPayment = array(
@@ -2931,7 +2968,7 @@ class PaypalTestCase extends CakeTestCase {
 				)
 			)
 		);
-		
+
 		// The request we expect to send to paypal
 		$mockRequest = array(
 			'method' => 'POST',
@@ -3018,21 +3055,21 @@ class PaypalTestCase extends CakeTestCase {
 				)
 			)
 		);
-		
+
 		$HttpSocketResponse = new stdClass();
 		$HttpSocketResponse->body = json_encode($expectedResponse);
 		$HttpSocketResponse->code = 200;
-		
+
 		$this->Paypal->HttpSocket->expects($this->once())
 			->method('request')
 			->with($this->equalTo($mockRequest))
 			->will($this->returnValue($HttpSocketResponse));
-		
+
 		$result = $this->Paypal->chargeStoredCard($cardPayment);
-		
+
 		$this->assertEqual($expectedResponse, $result);
 	}
-	
+
 /**
  * testChargeStoredCardHandleError
  *
@@ -3050,7 +3087,7 @@ class PaypalTestCase extends CakeTestCase {
 			'oAuthClientId' => 'ASPu1-BDs2U35hVZkITi2WzX98cbNahkSeoxsuvfmrXNTz-gA5EGslxk0fAFU',
 			'oAuthSecret' => 'EO6RKHYQ14G-U9Smbz4H8fUIY9Mf846URRNdYNNXQ2wghxC',
 		));
-		
+
 		$expectedTokenResponse = array(
 			'scope' => 'openid https://api.paypal.com/v1/payments/.* https://api.paypal.com/v1/vault/credit-card/.* https://api.paypal.com/v1/vault/credit-card',
 			'access_token' => 'Zr-NlxdL6u1kQNUNnG7SYUjsqFIk2OCI7wxGStzPEO8',
@@ -3058,35 +3095,35 @@ class PaypalTestCase extends CakeTestCase {
 			'app_id' => 'APP-7KR335967N254033H',
 			'expires_in' => 28800
 		);
-		
+
 		// Mock the HttpSocket classs
 		$this->Paypal->HttpSocket = $this->getMock('HttpSocket');
-		
+
 		// Mock the HttpSocket configAuth method
 		$this->Paypal->HttpSocket->expects($this->once())
 			->method('configAuth')
 			->with('Basic', 'ASPu1-BDs2U35hVZkITi2WzX98cbNahkSeoxsuvfmrXNTz-gA5EGslxk0fAFU', 'EO6RKHYQ14G-U9Smbz4H8fUIY9Mf846URRNdYNNXQ2wghxC');
-		
+
 		// Mock the HttpSocket post method
 		$expectedTokenResponse = json_encode($expectedTokenResponse);
-		
+
 		$HttpSocketResponse = new stdClass();
 		$HttpSocketResponse->body = $expectedTokenResponse;
 		$HttpSocketResponse->code = 200;
-		
+
 		$this->Paypal->HttpSocket->expects($this->once())
 			->method('post')
 			->with('https://api.sandbox.paypal.com/v1/oauth2/token', array(
 				"grant_type" => "client_credentials"
 			))
 			->will($this->returnValue($HttpSocketResponse));
-		
+
 		// Mock the HttpSocket reset method
 		$this->Paypal->HttpSocket->expects($this->once())
 			->method('reset');
-			
+
 		// Expected JSON to be posted to paypal
-		$expectedJSON = '{"intent":"sale","redirect_urls":{"return_url":"http:\/\/copify.com\/return","cancel_url":"http:\/\/copify.com\/cancel"},"payer":{"payment_method":"credit_card","funding_instruments":[{"credit_card_token":{"credit_card_id":"CARD-39N78604CK9041431KM2DDC2","payer_id":"186"}}]},"transactions":[{"amount":{"total":"0.60","currency":"GBP","details":{"subtotal":"0.50","tax":"0.10","shipping":"0.00"}},"description":"This is test payment to copify"}]}';	
+		$expectedJSON = '{"intent":"sale","redirect_urls":{"return_url":"http:\/\/copify.com\/return","cancel_url":"http:\/\/copify.com\/cancel"},"payer":{"payment_method":"credit_card","funding_instruments":[{"credit_card_token":{"credit_card_id":"CARD-39N78604CK9041431KM2DDC2","payer_id":"186"}}]},"transactions":[{"amount":{"total":"0.60","currency":"GBP","details":{"subtotal":"0.50","tax":"0.10","shipping":"0.00"}},"description":"This is test payment to copify"}]}';
 
 		// Our transaction, we'll build this from the users data
 		$cardPayment = array(
@@ -3121,7 +3158,7 @@ class PaypalTestCase extends CakeTestCase {
 				)
 			)
 		);
-		
+
 		// The request we expect to send to paypal
 		$mockRequest = array(
 			'method' => 'POST',
@@ -3132,26 +3169,26 @@ class PaypalTestCase extends CakeTestCase {
 			'uri' => 'https://api.sandbox.paypal.com/v1/payments/payment',
 			'body' => $expectedJSON
 		);
-		
+
 		$response = array(
 			'name' => 'INTERNAL_SERVICE_ERROR',
 			'message' => 'An internal service error has occurred',
 			'information_link' => 'https://developer.paypal.com/webapps/developer/docs/api/#INTERNAL_SERVICE_ERROR',
 			'debug_id' => '1fe3ea968af59'
 		);
-		
+
 		$HttpSocketResponse = new stdClass();
 		$HttpSocketResponse->body = json_encode($response);
 		$HttpSocketResponse->code = 500;
-		
+
 		$this->Paypal->HttpSocket->expects($this->once())
 			->method('request')
 			->with($this->equalTo($mockRequest))
 			->will($this->returnValue($HttpSocketResponse));
-		
+
 		$result = $this->Paypal->chargeStoredCard($cardPayment);
 	}
-	
+
 /**
  * testChargeStoredCardHandleErrorNoMessage
  *
@@ -3205,7 +3242,7 @@ class PaypalTestCase extends CakeTestCase {
 			->method('reset');
 
 		// Expected JSON to be posted to paypal
-		$expectedJSON = '{"intent":"sale","redirect_urls":{"return_url":"http:\/\/copify.com\/return","cancel_url":"http:\/\/copify.com\/cancel"},"payer":{"payment_method":"credit_card","funding_instruments":[{"credit_card_token":{"credit_card_id":"CARD-39N78604CK9041431KM2DDC2","payer_id":"186"}}]},"transactions":[{"amount":{"total":"0.60","currency":"GBP","details":{"subtotal":"0.50","tax":"0.10","shipping":"0.00"}},"description":"This is test payment to copify"}]}';	
+		$expectedJSON = '{"intent":"sale","redirect_urls":{"return_url":"http:\/\/copify.com\/return","cancel_url":"http:\/\/copify.com\/cancel"},"payer":{"payment_method":"credit_card","funding_instruments":[{"credit_card_token":{"credit_card_id":"CARD-39N78604CK9041431KM2DDC2","payer_id":"186"}}]},"transactions":[{"amount":{"total":"0.60","currency":"GBP","details":{"subtotal":"0.50","tax":"0.10","shipping":"0.00"}},"description":"This is test payment to copify"}]}';
 
 		// Our transaction, we'll build this from the users data
 		$cardPayment = array(
@@ -3270,5 +3307,5 @@ class PaypalTestCase extends CakeTestCase {
 
 		$result = $this->Paypal->chargeStoredCard($cardPayment);
 	}
-	
+
 }
