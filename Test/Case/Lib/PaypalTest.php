@@ -2016,6 +2016,189 @@ class PaypalTestCase extends CakeTestCase {
 	}
 
 /**
+ * test DoCapture
+ *
+ * @return void
+ * @author Rob Mcvey
+ **/
+	public function testDoCapture() {
+		$this->Paypal = new Paypal(array(
+			'sandboxMode' => true,
+			'nvpUsername' => 'foo',
+			'nvpPassword' => 'bar',
+			'nvpSignature' => 'foobar'
+		));
+		$payment = array(
+			'authorization_id' => '03661889VK781443M',
+			'amount' => 20.00,
+			'currency' => 'GBP',
+			'complete' => true
+		);		
+		$successResponse = 'AUTHORIZATIONID=03661889VK781443M&TIMESTAMP=2015%2d04%2d23T13%3a08%3a48Z&CORRELATIONID=9355061c7b13e&ACK=Success&VERSION=104%2e0&BUILD=16309297&TRANSACTIONID=50A53299PJ059723D&PARENTTRANSACTIONID=03661889VK781443M&TRANSACTIONTYPE=cart&PAYMENTTYPE=instant&ORDERTIME=2015%2d04%2d23T13%3a08%3a48Z&AMT=20%2e00&FEEAMT=0%2e88&TAXAMT=4%2e00&CURRENCYCODE=GBP&PAYMENTSTATUS=Completed&PENDINGREASON=None&REASONCODE=None&PROTECTIONELIGIBILITY=Eligible&PROTECTIONELIGIBILITYTYPE=ItemNotReceivedEligible%2cUnauthorizedPaymentEligible';
+		// $wrongAmountResponse = 'AUTHORIZATIONID=03661889VK781443M&TIMESTAMP=2015%2d04%2d23T13%3a08%3a07Z&CORRELATIONID=54f26b397c184&ACK=Failure&VERSION=104%2e0&BUILD=16309297&L_ERRORCODE0=10610&L_SHORTMESSAGE0=Amount%20limit%20exceeded%2e&L_LONGMESSAGE0=Amount%20specified%20exceeds%20allowable%20limit%2e&L_SEVERITYCODE0=Error';
+		// 		$alreadyCaptured = 'AUTHORIZATIONID=03661889VK781443M&TIMESTAMP=2015%2d04%2d23T13%3a09%3a38Z&CORRELATIONID=84de5b499e5eb&ACK=Failure&VERSION=104%2e0&BUILD=16309297&L_ERRORCODE0=10602&L_SHORTMESSAGE0=Authorization%20completed%2e&L_LONGMESSAGE0=Authorization%20has%20already%20been%20completed%2e&L_SEVERITYCODE0=Error';
+		
+		$expectedEndpoint = 'https://api-3t.sandbox.paypal.com/nvp';
+		$expectedNvps = array(
+			'METHOD' => 'DoCapture',
+			'VERSION' => '104.0',
+			'USER' => 'foo',
+			'PWD' => 'bar',
+			'SIGNATURE' => 'foobar',
+			'AUTHORIZATIONID' => '03661889VK781443M',
+			'AMT' => 20,
+			'CURRENCYCODE' => 'GBP',
+			'COMPLETETYPE' => 'Complete'
+		);
+		
+		$this->Paypal->HttpSocket = $this->getMock('HttpSocket');
+		$this->Paypal->HttpSocket->expects($this->once())
+			->method('post')
+			->with($this->equalTo($expectedEndpoint) , $this->equalTo($expectedNvps))
+			->will($this->returnValue($successResponse));
+
+		$payment = array(
+			'authorization_id' => '03661889VK781443M',
+			'amount' => 20.00,
+			'currency' => 'GBP',
+			'complete' => true
+		);
+
+		$result = $this->Paypal->doCapture($payment);
+
+		$expected = array(
+			'AUTHORIZATIONID' => '03661889VK781443M',
+			'TIMESTAMP' => '2015-04-23T13:08:48Z',
+			'CORRELATIONID' => '9355061c7b13e',
+			'ACK' => 'Success',
+			'VERSION' => '104.0',
+			'BUILD' => '16309297',
+			'TRANSACTIONID' => '50A53299PJ059723D',
+			'PARENTTRANSACTIONID' => '03661889VK781443M',
+			'TRANSACTIONTYPE' => 'cart',
+			'PAYMENTTYPE' => 'instant',
+			'ORDERTIME' => '2015-04-23T13:08:48Z',
+			'AMT' => '20.00',
+			'FEEAMT' => '0.88',
+			'TAXAMT' => '4.00',
+			'CURRENCYCODE' => 'GBP',
+			'PAYMENTSTATUS' => 'Completed',
+			'PENDINGREASON' => 'None',
+			'REASONCODE' => 'None',
+			'PROTECTIONELIGIBILITY' => 'Eligible',
+			'PROTECTIONELIGIBILITYTYPE' => 'ItemNotReceivedEligible,UnauthorizedPaymentEligible'
+		);
+
+		$this->assertEqual($expected, $result);
+	}
+
+/**
+ * testDoCaptureWrongAmount
+ *
+ * @return void
+ * @author Rob Mcvey
+ * @expectedException PaypalException
+ * @expectedExceptionMessage Amount specified exceeds allowable limit.
+ **/
+	public function testDoCaptureWrongAmountException() {
+		$this->Paypal = new Paypal(array(
+			'sandboxMode' => true,
+			'nvpUsername' => 'foo',
+			'nvpPassword' => 'bar',
+			'nvpSignature' => 'foobar'
+		));
+		$payment = array(
+			'authorization_id' => '03661889VK781443M',
+			'amount' => 20.00,
+			'currency' => 'GBP',
+			'complete' => true
+		);
+
+		$wrongAmountResponse = 'AUTHORIZATIONID=03661889VK781443M&TIMESTAMP=2015%2d04%2d23T13%3a08%3a07Z&CORRELATIONID=54f26b397c184&ACK=Failure&VERSION=104%2e0&BUILD=16309297&L_ERRORCODE0=10610&L_SHORTMESSAGE0=Amount%20limit%20exceeded%2e&L_LONGMESSAGE0=Amount%20specified%20exceeds%20allowable%20limit%2e&L_SEVERITYCODE0=Error';
+
+		$expectedEndpoint = 'https://api-3t.sandbox.paypal.com/nvp';
+		$expectedNvps = array(
+			'METHOD' => 'DoCapture',
+			'VERSION' => '104.0',
+			'USER' => 'foo',
+			'PWD' => 'bar',
+			'SIGNATURE' => 'foobar',
+			'AUTHORIZATIONID' => '03661889VK781443M',
+			'AMT' => 2222.20,
+			'CURRENCYCODE' => 'GBP',
+			'COMPLETETYPE' => 'Complete'
+		);
+
+		$this->Paypal->HttpSocket = $this->getMock('HttpSocket');
+		$this->Paypal->HttpSocket->expects($this->once())
+			->method('post')
+			->with($this->equalTo($expectedEndpoint) , $this->equalTo($expectedNvps))
+			->will($this->returnValue($wrongAmountResponse));
+
+		$payment = array(
+			'authorization_id' => '03661889VK781443M',
+			'amount' => 2222.20,
+			'currency' => 'GBP',
+			'complete' => true
+		);
+
+		$result = $this->Paypal->doCapture($payment);
+	}
+
+/**
+ * testDoCaptureAlreadyCapturedException
+ *
+ * @return void
+ * @author Rob Mcvey
+ * @expectedException PaypalException
+ * @expectedExceptionMessage Authorization has already been completed.
+ **/
+	public function testDoCaptureAlreadyCapturedException() {
+		$this->Paypal = new Paypal(array(
+			'sandboxMode' => true,
+			'nvpUsername' => 'foo',
+			'nvpPassword' => 'bar',
+			'nvpSignature' => 'foobar'
+		));
+		$payment = array(
+			'authorization_id' => '03661889VK781443M',
+			'amount' => 20.00,
+			'currency' => 'GBP',
+			'complete' => true
+		);
+
+		$alreadyCaptured = 'AUTHORIZATIONID=03661889VK781443M&TIMESTAMP=2015%2d04%2d23T13%3a09%3a38Z&CORRELATIONID=84de5b499e5eb&ACK=Failure&VERSION=104%2e0&BUILD=16309297&L_ERRORCODE0=10602&L_SHORTMESSAGE0=Authorization%20completed%2e&L_LONGMESSAGE0=Authorization%20has%20already%20been%20completed%2e&L_SEVERITYCODE0=Error';
+
+		$expectedEndpoint = 'https://api-3t.sandbox.paypal.com/nvp';
+		$expectedNvps = array(
+			'METHOD' => 'DoCapture',
+			'VERSION' => '104.0',
+			'USER' => 'foo',
+			'PWD' => 'bar',
+			'SIGNATURE' => 'foobar',
+			'AUTHORIZATIONID' => '03661889VK781443M',
+			'AMT' => 20.00,
+			'CURRENCYCODE' => 'GBP',
+			'COMPLETETYPE' => 'Complete'
+		);
+
+		$this->Paypal->HttpSocket = $this->getMock('HttpSocket');
+		$this->Paypal->HttpSocket->expects($this->once())
+			->method('post')
+			->with($this->equalTo($expectedEndpoint) , $this->equalTo($expectedNvps))
+			->will($this->returnValue($alreadyCaptured));
+
+		$payment = array(
+			'authorization_id' => '03661889VK781443M',
+			'amount' => 20.00,
+			'currency' => 'GBP',
+			'complete' => true
+		);
+
+		$result = $this->Paypal->doCapture($payment);
+	}
+
+/**
  * test formatDoCaptureNvps
  *
  * @return void

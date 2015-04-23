@@ -398,7 +398,7 @@ class Paypal {
 			$endPoint = $this->getClassicEndpoint();
 
 			// Make a Http request for a new token
-			$response = $this->HttpSocket->post($endPoint , $finalNvps);
+			$response = $this->HttpSocket->post($endPoint, $finalNvps);
 
 			// Parse the results
 			$parsed = $this->parseClassicApiResponse($response);
@@ -452,7 +452,7 @@ class Paypal {
 				throw new PaypalException($this->getErrorMessage($parsed));
 			}
 			else {
-				throw new PaypalException(__d('paypal' , 'There was an error processing the card payment'));
+				throw new PaypalException(__d('paypal', 'There was an error processing the card payment'));
 			}
 		} catch (SocketException $e) {
 			throw new PaypalException(__d('paypal', 'There was a problem processing your card, please try again.'));
@@ -479,7 +479,8 @@ class Paypal {
 			// Classic API endpoint
 			$endPoint = $this->getClassicEndpoint();
 			// Make a Http request for a new token
-			$response = $this->HttpSocket->post($endPoint , $nvps);
+			$response = $this->HttpSocket->post($endPoint, $nvps);
+
 			// Parse the results
 			$parsed = $this->parseClassicApiResponse($response);
 
@@ -491,7 +492,7 @@ class Paypal {
 				throw new PaypalException($this->getErrorMessage($parsed));
 			}
 			else {
-				throw new PaypalException(__d('paypal' , 'There was an error processing the payment'));
+				throw new PaypalException(__d('paypal', 'There was an error processing the payment'));
 			}
 		} catch (SocketException $e) {
 			throw new PaypalException(__d('paypal', 'There was a problem processing the payment, please try again.'));
@@ -507,16 +508,16 @@ class Paypal {
  **/
 	public function formatDoCaptureNvps($order) {
 		if (empty($order) || !is_array($order)) {
-			throw new PaypalException(__d('paypal' , 'You must pass a valid order array'));
+			throw new PaypalException(__d('paypal', 'You must pass a valid order array'));
 		}
 		if (!isset($order['authorization_id'])) {
-			throw new PaypalException(__d('paypal' , 'authorization_id must be passed.'));
+			throw new PaypalException(__d('paypal', 'authorization_id must be passed.'));
 		}
 		if (!isset($order['amount'])) {
-			throw new PaypalException(__d('paypal' , 'You must pass an amount must be passed.'));
+			throw new PaypalException(__d('paypal', 'You must pass an amount must be passed.'));
 		}
 		if (!isset($order['currency']))  {
-			throw new PaypalException(__d('paypal' , 'You must provide a currency code'));
+			throw new PaypalException(__d('paypal', 'You must provide a currency code'));
 		}
 
 		if (empty($order['complete'])) {
