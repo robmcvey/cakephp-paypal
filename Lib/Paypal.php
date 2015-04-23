@@ -539,6 +539,80 @@ class Paypal {
 	}
 
 /**
+ * DoVoid
+ * The DoVoid API Operation enables you to void a previously authorized payment
+ *
+ * @param array $payment Transaction Id and amount details to process
+ * @return void
+ * @author Michael Houghton
+ **/
+	public function doVoid($payment) {
+		try {
+			// Build NVPs
+			$nvps = $this->formatDoVoidNvps($payment);
+
+			// HttpSocket
+			if (!$this->HttpSocket) {
+				$this->HttpSocket = new HttpSocket();
+			}
+			// Classic API endpoint
+			$endPoint = $this->getClassicEndpoint();
+			// Make a Http request for a new token
+			$response = $this->HttpSocket->post($endPoint , $nvps);
+			// Parse the results
+			$parsed = $this->parseClassicApiResponse($response);
+
+			// Handle the resposne
+			if (isset($parsed['ACK']) && isset($parsed['ACK']) && in_array($parsed['ACK'], array('Success', 'SuccessWithWarning')))  {
+				return $parsed;
+			}
+			else if ($parsed['ACK'] == "Failure" && isset($parsed['L_LONGMESSAGE0']))  {
+				throw new PaypalException($this->getErrorMessage($parsed));
+			}
+			else {
+				throw new PaypalException(__d('paypal' , 'There was an error voiding the payment'));
+			}
+		} catch (SocketException $e) {
+			throw new PaypalException(__d('paypal', 'There was a problem voiding the payment, please try again.'));
+		}
+	}
+
+/**
+ * Formats the DoVoid array to Paypal nvps
+ *
+ * @param array $order Takes an array order (See tests for supported fields).
+ * @return array Formatted array of Paypal NVPs for DoCapture
+ * @author Michael Houghton
+ **/
+	public function formatDoVoidNvps($order) {
+		if (empty($order) || !is_array($order)) {
+			throw new PaypalException(__d('paypal' , 'You must pass a valid order array'));
+		}
+		if (!isset($order['authorization_id'])) {
+			throw new PaypalException(__d('paypal' , 'authorization_id must be passed.'));
+		}
+
+		$nvps = array(
+			'METHOD' => 'DoVoid',
+			'VERSION' => $this->paypalClassicApiVersion,
+			'USER' => $this->nvpUsername,
+			'PWD' => $this->nvpPassword,
+			'SIGNATURE' => $this->nvpSignature,
+			'AUTHORIZATIONID' => $order['authorization_id']
+		);
+
+		if (!empty($order['note'])) {
+			$nvps['NOTE'] = $order['note'];
+		}
+
+		if (!empty($order['message_id'])) {
+			$nvps['MSGSUBID'] = $order['message_id'];
+		}
+
+		return $nvps;
+	}
+
+/**
  * RefundTransaction
  * The RefundTransaction API Operation enables you to refund a transaction that is less than 60 days old.
  *

@@ -2053,6 +2053,41 @@ class PaypalTestCase extends CakeTestCase {
 	}
 
 /**
+ * test formatDoVoidNvps
+ *
+ * @return void
+ * @author Michael Houghton
+ **/
+	public function testformatDoVoidNvps() {
+		$this->Paypal = new Paypal(array(
+			'sandboxMode' => true,
+			'nvpUsername' => 'foo',
+			'nvpPassword' => 'bar',
+			'nvpSignature' => 'foobar'
+		));
+
+		$payment = array();
+		$payment['authorization_id'] = '9MT40927JS1733007';
+		$payment['note']             = 'test is a test note';
+		$payment['message_id']       = 100;
+
+		$result = $this->Paypal->formatDoVoidNvps($payment);
+
+		$expected = array(
+			'METHOD' => 'DoVoid',
+			'VERSION' => '104.0',
+			'USER' => 'foo',
+			'PWD' => 'bar',
+			'SIGNATURE' => 'foobar',
+			'AUTHORIZATIONID' => '9MT40927JS1733007',
+			'NOTE' => 'test is a test note',
+			'MSGSUBID' => 100
+		);
+
+		$this->assertEqual($expected , $result);
+	}
+
+/**
  * testFormatRefundTransactionNvpsMissingTransId
  *
  * @return void
