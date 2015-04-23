@@ -2234,6 +2234,60 @@ class PaypalTestCase extends CakeTestCase {
 	}
 
 /**
+ * testDoVoid
+ *
+ * @return void
+ * @author Rob Mcvey
+ **/
+	public function testDoVoid() {
+		$this->Paypal = new Paypal(array(
+			'sandboxMode' => true,
+			'nvpUsername' => 'foo',
+			'nvpPassword' => 'bar',
+			'nvpSignature' => 'foobar'
+		));
+
+		$successResponse = 'AUTHORIZATIONID=66M04664CK832591B&MSGSUBID=100&TIMESTAMP=2015%2d04%2d23T13%3a52%3a03Z&CORRELATIONID=f937b479e4ec9&ACK=Success&VERSION=104%2e0&BUILD=16404403';
+
+		$payment = array();
+		$payment['authorization_id'] = '66M04664CK832591B';
+		$payment['note']             = 'test is a test note';
+		$payment['message_id']       = 100;
+
+		$expectedEndpoint = 'https://api-3t.sandbox.paypal.com/nvp';
+		$expectedNvps = array(
+			'METHOD' => 'DoVoid',
+			'VERSION' => '104.0',
+			'USER' => 'foo',
+			'PWD' => 'bar',
+			'SIGNATURE' => 'foobar',
+			'AUTHORIZATIONID' => '66M04664CK832591B',
+			'NOTE' => 'test is a test note',
+			'MSGSUBID' => 100
+		);
+
+		$this->Paypal->HttpSocket = $this->getMock('HttpSocket');
+		$this->Paypal->HttpSocket->expects($this->once())
+			->method('post')
+			->with($this->equalTo($expectedEndpoint) , $this->equalTo($expectedNvps))
+			->will($this->returnValue($successResponse));
+
+		$result = $this->Paypal->doVoid($payment);
+
+		$expected = array(
+			'AUTHORIZATIONID' => '66M04664CK832591B',
+			'MSGSUBID' => '100',
+			'TIMESTAMP' => '2015-04-23T13:52:03Z',
+			'CORRELATIONID' => 'f937b479e4ec9',
+			'ACK' => 'Success',
+			'VERSION' => '104.0',
+			'BUILD' => '16404403'
+		);
+
+		$this->assertEqual($expected, $result);
+	}
+
+/**
  * test formatDoVoidNvps
  *
  * @return void

@@ -560,6 +560,7 @@ class Paypal {
 			$endPoint = $this->getClassicEndpoint();
 			// Make a Http request for a new token
 			$response = $this->HttpSocket->post($endPoint , $nvps);
+
 			// Parse the results
 			$parsed = $this->parseClassicApiResponse($response);
 
