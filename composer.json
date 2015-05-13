@@ -1,6 +1,6 @@
 {
 	"name": "robmcvey/cakephp-paypal",
-	"description": "PayPal plugin",
+	"description": "PayPal payments plugin for CakePHP 3.x",
 	"type": "cakephp-plugin",
 	"require": {
 		"php": ">=5.2.8",
@@ -10,6 +10,16 @@
 		"phpunit/phpunit": "3.7.*",
 		"cakephp/debug_kit" : "2.2.*"
 	},
+	"autoload": {
+      "psr-4": {
+        "CakePayPal\\": "src"
+      }
+  },
+  "autoload-dev": {
+      "psr-4": {
+          "CakePayPal\\Test\\": "tests"
+      }
+  },
 	"bin": [
 		"lib/Cake/Console/cake"
 	]

@@ -1,3 +1,11 @@
+/build
+/dist
+/tags
+/composer.lock
+/phpunit.xml
+/vendor
+*.mo
+
 # OS generated files #
 ######################
 .DS_Store
