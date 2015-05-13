@@ -7,19 +7,31 @@
 //  Copyright 2015 Rob McVey. All rights reserved.
 // 
 namespace CakePayPal\Payments;
+
+use Cake\Utility\Inflector;
  
 class Classic 
 {
 
-	/**
-	 * undocumented function
-	 *
-	 * @return void
-	 * @author Rob Mcvey
-	 **/
-	public function foo() 
-	{
-		return 'Classic';
-	}
-	
+/**
+ * undocumented function
+ *
+ * @return void
+ * @author Rob Mcvey
+ **/
+    public function foo() 
+    {
+        return 'Classic';
+    }
+
+/**
+ * undocumented function
+ *
+ * @return void
+ * @author Rob Mcvey
+ **/
+    public function humanize($string) {
+        return Inflector::humanize($string);
+    }
+
 }

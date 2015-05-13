@@ -1,6 +1,6 @@
 <?php
 // 
-//  PayPalTest.php
+//  ClassicTest.php
 //  cakephp-paypal
 //  
 //  Created by Rob Mcvey on 2015-05-13.
@@ -8,10 +8,10 @@
 // 
 namespace CakePayPal\Test\TestCase\Payments;
 
-//use CakePayPal\Payments; ???
+use CakePayPal\Payments\Classic;
 use Cake\TestSuite\TestCase;
 
-class PayPalTest extends TestCase 
+class ClassicTest extends TestCase
 {
 
 /**
@@ -35,8 +35,20 @@ class PayPalTest extends TestCase
  **/
     public function testClassic() 
     {
-        $Classic = new \CakePayPal\Payments\Classic();
+        $Classic = new Classic();
         $this->assertEquals('Classic', $Classic->foo());
+    }
+
+/**
+ * undocumented function
+ *
+ * @return void
+ * @author Rob Mcvey
+ **/
+    public function testInflector() 
+    {   
+        $Classic = new Classic();
+        $this->assertEquals('Lower Case Delimited String', $Classic->humanize('lower_case_delimited_string'));
     }
 
 }
