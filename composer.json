@@ -1,5 +1,5 @@
 {
-	"name": "robmcvey/cakephp-paypal",
+	"name": "ajibarra/cakephp-paypal",
 	"description": "PayPal plugin",
 	"type": "cakephp-plugin",
 	"require": {
