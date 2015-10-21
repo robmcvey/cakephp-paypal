@@ -895,6 +895,8 @@ class Paypal {
 		$month = $payment['expiry']['M'];
 		$year = $payment['expiry']['Y'];
 		$expiry = sprintf('%d%d' , $month, $year);
+		// Currency
+		$currency = (isset($payment['currency'])) ? $payment['currency'] : 'GBP';
 		// Build NVps
 		$nvps = array(
 			'METHOD' => 'DoDirectPayment',
@@ -904,7 +906,7 @@ class Paypal {
 			'SIGNATURE' => $this->nvpSignature,
 			'IPADDRESS' => $ipAddress, 		// Required
 			'AMT' => $payment['amount'], 	// The total cost of the transaction
-			'CURRENCYCODE' => 'GBP',		// A 3-character currency code
+			'CURRENCYCODE' => $currency,		// A 3-character currency code
 			'RECURRING' => 'N',				// Recurring flag
 			'ACCT' => $payment['card'],		// Numeric characters only with no spaces
 			'EXPDATE' => $expiry,			// MMYYYY
@@ -917,6 +919,7 @@ class Paypal {
 			'COUNTRYCODE' => '',			// Required 2 single-byte characters
 			'ZIP' => '', 					// Required
 		);
+		
 		return $nvps;
 	}
 
