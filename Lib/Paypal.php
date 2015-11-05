@@ -656,7 +656,7 @@ class Paypal {
  *
  * @return void
  * @author Rob Mcvey
- * @link https://developer.paypal.com/docs/integration/direct/store-a-credit-card/#store-a-credit-card
+ * @link https://developer.paypal.com/docs/integration/direct/rest-vault-overview/#store-a-credit-card
  **/
 	public function storeCreditCard($creditCard) {
 		// HttpSocket
