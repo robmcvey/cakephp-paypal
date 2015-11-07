@@ -36,6 +36,22 @@ In your `Plugin` directory type:
 git clone -b master git://github.com/robmcvey/cakephp-paypal.git Paypal
 ```
 
+_[Composer]_
+
+```shell
+composer require robmcvey/cakephp-paypal
+```
+
+in the `composer.json` file of your project add
+```
+"extra": {
+        "installer-paths": {
+            "Plugin/Paypal": ["robmcvey/cakephp-paypal"]
+        }
+    },
+```
+The plugin will be installed in your Plugin directory.
+
 ### Usage
 
 Make sure the plugin is loaded in `app/Config/bootstrap.php`.
