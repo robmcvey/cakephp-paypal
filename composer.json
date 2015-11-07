@@ -4,7 +4,8 @@
 	"type": "cakephp-plugin",
 	"require": {
 		"php": ">=5.2.8",
-		"ext-mcrypt": "*"
+		"ext-mcrypt": "*",
+		"composer/installers": "~1.0"
 	},
 	"require-dev": {
 		"phpunit/phpunit": "3.7.*",
