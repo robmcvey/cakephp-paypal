@@ -423,6 +423,54 @@ class Paypal {
 	}
 
 /**
+ * Shows information about a specific transaction.
+ *
+ * @param string (Required) Unique identifier of a transaction.
+ * @return array Nicely parsed array
+ * @author Mustapha EL BAKAI
+ **/
+	public function getTransactionDetails($transaction_id) {
+		try {
+				// Build the NVPs (Named value pairs)
+				$nvps = array(
+					'METHOD' => 'GetTransactionDetails' ,
+					'VERSION' => $this->paypalClassicApiVersion,
+					'USER' => $this->nvpUsername,
+					'PWD' => $this->nvpPassword,
+					'SIGNATURE' => $this->nvpSignature,
+					'TRANSACTIONID' => $transaction_id,
+				);
+
+				// HttpSocket
+				if (!$this->HttpSocket) {
+					$this->HttpSocket = new HttpSocket();
+				}
+				// Classic API endpoint
+				$endPoint = $this->getClassicEndpoint();
+
+				// Make a Http request for a new token
+				$response = $this->HttpSocket->post($endPoint , $nvps);
+
+				// Parse the results
+				$parsed = $this->parseClassicApiResponse($response);
+
+				// Handle the resposne
+	            if (isset($parsed['ACK']) && in_array($parsed['ACK'], array('Success', 'SuccessWithWarning'))) {
+	                return $parsed;
+	            }
+	            else if ($parsed['ACK'] == "Failure" && isset($parsed['L_LONGMESSAGE0']))  {
+	                throw new PaypalException($this->getErrorMessage($parsed));
+	            }
+	            else {
+	                throw new PaypalException(__d('paypal' , 'There was an error while connecting to Paypal'));
+	            }
+
+		} catch (SocketException $e) {
+			throw new PaypalException(__d('paypal', 'There was a problem initiating the transaction, please try again.'));
+		}
+	}
+
+/**
  * DoDirectPayment
  * The DoDirectPayment API Operation enables you to process a credit card payment.
  *
